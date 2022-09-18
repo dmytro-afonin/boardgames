@@ -3,6 +3,8 @@
   "version": 2,
   "projects": {
     "conflict": "apps/conflict",
-    "conflict-e2e": "apps/conflict-e2e"
+    "conflict-e2e": "apps/conflict-e2e",
+    "data-auth": "libs/data/auth",
+    "feature-login": "libs/feature/login"
   }
 }

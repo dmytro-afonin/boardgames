@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "conflict-30f20": {
+      "hosting": {
+        "conflict": [
+          "conflict-30f20"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "conflict-30f20"
+  }
+}
