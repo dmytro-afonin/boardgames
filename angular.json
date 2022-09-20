@@ -5,6 +5,8 @@
     "conflict": "apps/conflict",
     "conflict-e2e": "apps/conflict-e2e",
     "data-auth": "libs/data/auth",
-    "feature-login": "libs/feature/login"
+    "data-session": "libs/data/session",
+    "feature-login": "libs/feature/login",
+    "feature-session-list": "libs/feature/session-list"
   }
 }

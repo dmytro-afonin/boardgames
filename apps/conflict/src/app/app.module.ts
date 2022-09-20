@@ -7,7 +7,7 @@ import { environment } from '../environments/environment';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreRouterConnectingModule } from '@ngrx/router-store';
 import { HttpClientModule } from "@angular/common/http";
-import { RouterModule, Routes } from '@angular/router';
+import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
@@ -18,6 +18,10 @@ const routes: Routes = [
     path: 'login',
     canActivate: [],
     loadChildren: () => import('@boardgames/feature/login').then(m => m.FeatureLoginModule)
+  },
+  {
+    path: '',
+    loadChildren: () => import('@boardgames/feature/session-list').then(m => m.FeatureSessionListModule)
   }
 ];
 
@@ -33,7 +37,10 @@ const routes: Routes = [
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
     AngularFireDatabaseModule,
-    RouterModule.forRoot(routes),
+    RouterModule.forRoot(routes, {
+      preloadingStrategy: PreloadAllModules,
+      paramsInheritanceStrategy: "always"
+    }),
     BrowserAnimationsModule
   ],
   providers: [],

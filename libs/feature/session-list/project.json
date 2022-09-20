@@ -1,0 +1,42 @@
+{
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/feature/session-list/src",
+  "prefix": "feature",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:ng-packagr-lite",
+      "outputs": ["dist/libs/feature/session-list"],
+      "options": {
+        "project": "libs/feature/session-list/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/feature/session-list/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/feature/session-list/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/feature/session-list"],
+      "options": {
+        "jestConfig": "libs/feature/session-list/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/feature/session-list/**/*.ts",
+          "libs/feature/session-list/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

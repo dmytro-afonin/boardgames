@@ -4,10 +4,16 @@
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "parserOptions": {
+        "project": ["apps/conflict-e2e/tsconfig.json"]
+      },
       "rules": {}
     },
     {
       "files": ["src/plugins/index.js"],
+      "parserOptions": {
+        "project": ["apps/conflict-e2e/tsconfig.json"]
+      },
       "rules": {
         "@typescript-eslint/no-var-requires": "off",
         "no-undef": "off"
