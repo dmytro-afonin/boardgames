@@ -4,7 +4,6 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { AuthFacade } from '@boardgames/data/auth';
-import { tap } from 'rxjs';
 
 @Component({
   selector: 'feature-login-container',
@@ -15,12 +14,13 @@ import { tap } from 'rxjs';
 })
 export class LoginContainerComponent {
   constructor(private readonly authFacade: AuthFacade) {
-    this.authFacade.allAuth$.pipe(tap((u) => {
-      console.log({u});
-    })).subscribe();
   }
 
   onLogInAnonymouslyButtonClick() {
     this.authFacade.anonymousLogin();
+  }
+
+  googleLogin() {
+    this.authFacade.googleLogin();
   }
 }

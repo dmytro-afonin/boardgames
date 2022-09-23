@@ -4,6 +4,7 @@ import {
   SessionState,
   sessionAdapter,
 } from './session.reducer';
+import { SessionEntity } from './session.models';
 
 // Lookup the 'Session' feature state managed by NgRx
 export const selectSessionState =
@@ -24,6 +25,18 @@ export const selectSessionError = createSelector(
 export const selectAllSession = createSelector(
   selectSessionState,
   (state: SessionState) => selectAll(state)
+);
+
+export const selectSessionList = createSelector(
+  selectAllSession,
+  (sessions: SessionEntity[]) => {
+    return sessions.map((session) => {
+      return {
+        ...session,
+        usersArray: Object.values(session.users)
+      }
+    })
+  }
 );
 
 export const selectSessionEntities = createSelector(

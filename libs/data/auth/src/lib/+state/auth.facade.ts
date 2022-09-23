@@ -26,4 +26,8 @@ export class AuthFacade {
   anonymousLogin() {
     this.store.dispatch(AuthActions.anonymousLogin());
   }
+
+  googleLogin() {
+    this.store.dispatch(AuthActions.googleLogin());
+  }
 }

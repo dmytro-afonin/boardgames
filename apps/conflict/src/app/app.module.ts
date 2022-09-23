@@ -12,6 +12,9 @@ import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DataAuthModule } from '@boardgames/data/auth';
+import { DataSessionModule } from '@boardgames/data/session';
+import { AngularFireAuthGuard } from '@angular/fire/compat/auth-guard';
 
 const routes: Routes = [
   {
@@ -21,6 +24,7 @@ const routes: Routes = [
   },
   {
     path: '',
+    canActivate: [AngularFireAuthGuard],
     loadChildren: () => import('@boardgames/feature/session-list').then(m => m.FeatureSessionListModule)
   }
 ];
@@ -41,9 +45,10 @@ const routes: Routes = [
       preloadingStrategy: PreloadAllModules,
       paramsInheritanceStrategy: "always"
     }),
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    DataAuthModule,
+    DataSessionModule
   ],
-  providers: [],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

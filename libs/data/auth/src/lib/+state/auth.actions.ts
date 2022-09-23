@@ -23,3 +23,5 @@ export const anonymousLoginFailure = createAction(
   '[Auth/firebase] anonymousLogin Failure',
   props<{ error: string }>()
 );
+
+export const googleLogin = createAction('[Auth] googleLogin');
