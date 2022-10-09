@@ -15,13 +15,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DataAuthModule } from '@boardgames/data/auth';
 import { DataSessionModule } from '@boardgames/data/session';
 import { AngularFireAuthGuard } from '@angular/fire/compat/auth-guard';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 const routes: Routes = [
-  {
-    path: 'login',
-    canActivate: [],
-    loadChildren: () => import('@boardgames/feature/login').then(m => m.FeatureLoginModule)
-  },
   {
     path: '',
     canActivate: [AngularFireAuthGuard],
@@ -48,11 +46,14 @@ const routes: Routes = [
     AngularFireDatabaseModule,
     RouterModule.forRoot(routes, {
       preloadingStrategy: PreloadAllModules,
-      paramsInheritanceStrategy: "always"
+      paramsInheritanceStrategy: 'always'
     }),
     BrowserAnimationsModule,
     DataAuthModule,
-    DataSessionModule
+    DataSessionModule,
+    MatToolbarModule,
+    MatIconModule,
+    MatButtonModule
   ],
   bootstrap: [AppComponent],
 })

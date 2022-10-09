@@ -1,1 +1,13 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button>
+    <mat-icon>home</mat-icon>
+  </button>
+
+  <span class="flex-grow">Cards Against Humanity</span>
+
+  <span *ngIf='user'>Welcome, {{user.name ?? user.id}} !</span>
+  <button mat-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon" (click)='googleLogin()'>
+    Google Log In
+  </button>
+</mat-toolbar>
 <router-outlet></router-outlet>
