@@ -5,11 +5,33 @@
       <div class='mb-5 flex flex'>
         <span class='flex-grow'>{{session.name}}</span>
 
-        <button mat-raised-button *ngIf='!session.users[currentUser.id]' (click)='joinSession(session)' color='primary'>JOIN</button>
+        <button
+          mat-raised-button
+          *ngIf='!session.users[currentUser.id]'
+          (click)='joinSession(session)'
+          color='primary'
+        >
+          JOIN
+        </button>
 
-        <div *ngIf='session.users[currentUser.id]'>
-          <mat-icon *ngIf='currentUser.id === session.ownerId'>hotel_class</mat-icon>
-          <mat-icon *ngIf='currentUser.id !== session.ownerId'>star</mat-icon>
+        <div *ngIf='session.users[currentUser.id]' class='flex items-center'>
+          <button mat-icon-button (click)='copyLink(session)' matTooltip='copy link'>
+            <mat-icon>link</mat-icon>
+          </button>
+
+          <mat-icon
+            *ngIf='currentUser.id === session.ownerId'
+            matTooltip='you are the owner'
+          >
+            hotel_class
+          </mat-icon>
+
+          <mat-icon
+            matTooltip='you joined this game'
+            *ngIf='currentUser.id !== session.ownerId'
+          >
+            star
+          </mat-icon>
         </div>
       </div>
 

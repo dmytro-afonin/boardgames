@@ -1,13 +1,12 @@
 {
+  "name": "data-auth",
   "projectType": "library",
   "sourceRoot": "libs/data/auth/src",
   "prefix": "data",
   "targets": {
     "build": {
       "executor": "@nrwl/angular:ng-packagr-lite",
-      "outputs": [
-        "dist/libs/data/auth"
-      ],
+      "outputs": ["dist/libs/data/auth"],
       "options": {
         "project": "libs/data/auth/ng-package.json"
       },
@@ -23,9 +22,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/libs/data/auth"
-      ],
+      "outputs": ["coverage/libs/data/auth"],
       "options": {
         "jestConfig": "libs/data/auth/jest.config.ts",
         "passWithNoTests": true

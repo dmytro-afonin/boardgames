@@ -18,9 +18,13 @@
       "@boardgames/data/auth": ["libs/data/auth/src/index.ts"],
       "@boardgames/data/session": ["libs/data/session/src/index.ts"],
       "@boardgames/feature/login": ["libs/feature/login/src/index.ts"],
+      "@boardgames/feature/session": ["libs/feature/session/src/index.ts"],
       "@boardgames/feature/session-list": [
         "libs/feature/session-list/src/index.ts"
-      ]
+      ],
+      "@boardgames/ui/hand": ["libs/ui/hand/src/index.ts"],
+      "@boardgames/ui/host": ["libs/ui/host/src/index.ts"],
+      "@boardgames/ui/leaderboard": ["libs/ui/leaderboard/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

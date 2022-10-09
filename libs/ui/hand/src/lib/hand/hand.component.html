@@ -1,0 +1,11 @@
+<mat-card>
+  <mat-chip-list aria-label="card selection">
+    <mat-chip
+      *ngFor='let option of sessionUser.hand; let i = index;'
+      [disabled]='sessionUser.selectedCards.length >= question.options'
+      (click)='optionSelected.next(i)'
+    >
+      {{option}}
+    </mat-chip>
+  </mat-chip-list>
+</mat-card>

@@ -1,6 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { CreateSessionPayload, SessionEntity } from './session.models';
-import { User } from '@boardgames/data/auth';
+import { SessionEntity, SessionUser } from './session.models';
 
 export const initSessions = createAction('[Sessions] Init');
 
@@ -15,10 +14,21 @@ export const loadSessionsFailure = createAction(
 );
 
 export const createSession = createAction('[Sessions] createSession',
-  props<{ session: CreateSessionPayload }>()
+  props<{ session: Partial<SessionEntity> }>()
 );
 
 export const joinSession = createAction(
   '[Session/Firestore] updateSession',
-  props<{ id: string; user: User;}>()
+  props<{ id: string; sessionUser: SessionUser;}>()
+);
+
+export const startSession = createAction(
+  '[Session/Firestore] startSession',
+  props<{ session: SessionEntity; }>()
+);
+
+
+export const chooseCard = createAction(
+  '[Session/Firestore] chooseCard',
+  props<{ sessionUser: SessionUser; sessionId: string }>()
 );

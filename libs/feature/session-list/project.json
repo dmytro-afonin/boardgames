@@ -1,4 +1,5 @@
 {
+  "name": "feature-session-list",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "libs/feature/session-list/src",

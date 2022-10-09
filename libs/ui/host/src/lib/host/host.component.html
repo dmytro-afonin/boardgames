@@ -1,0 +1,13 @@
+<mat-card>
+  <mat-card-title>{{session.currentQuestion.text}}</mat-card-title>
+  <mat-selection-list [multiple]="false">
+    <mat-list-option
+      *ngFor="let u of displayedUsers"
+      [disabled]='!isAnswersReady || user.id !== session.currentUserId'
+      (click)='selectOption(u.id)'
+    >
+      <div *ngIf='!isAnswersReady'>???</div>
+      <div *ngIf='isAnswersReady'>{{u.selectedCards.join(' / ')}}</div>
+    </mat-list-option>
+  </mat-selection-list>
+</mat-card>

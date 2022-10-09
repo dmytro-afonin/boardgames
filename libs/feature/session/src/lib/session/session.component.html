@@ -1,0 +1,34 @@
+<div *ngIf='session' class='p-3 bg-amber-300 h-full'>
+
+  <div class='mb-3'>
+    <ui-leaderboard [users]='users'></ui-leaderboard>
+  </div>
+
+  <ng-container *ngIf='session.started'>
+    <div class='mb-3'>
+      <ui-host
+        [session]='session'
+        [user]='sessionUser'
+        (winnerSelected)='selectWinner($event)'
+      ></ui-host>
+    </div>
+
+    <ui-hand
+      *ngIf='hand.length && session.currentUserId !== user.id'
+      [sessionUser]='sessionUser'
+      [question]='session.currentQuestion'
+      (optionSelected)='chooseCard($event)'
+    ></ui-hand>
+  </ng-container>
+
+  <mat-card *ngIf='!session.started'>
+    <button
+      mat-button
+      color='primary'
+      [disabled]='users.length < 3 || user.id !== session.ownerId'
+      (click)='startSession()'
+    >
+      Start session
+    </button>
+  </mat-card>
+</div>

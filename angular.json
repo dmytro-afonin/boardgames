@@ -7,6 +7,10 @@
     "data-auth": "libs/data/auth",
     "data-session": "libs/data/session",
     "feature-login": "libs/feature/login",
-    "feature-session-list": "libs/feature/session-list"
+    "feature-session": "libs/feature/session",
+    "feature-session-list": "libs/feature/session-list",
+    "ui-hand": "libs/ui/hand",
+    "ui-host": "libs/ui/host",
+    "ui-leaderboard": "libs/ui/leaderboard"
   }
 }

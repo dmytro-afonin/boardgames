@@ -3,6 +3,7 @@ import { createReducer, on, Action } from '@ngrx/store';
 
 import * as SessionActions from './session.actions';
 import { SessionEntity } from './session.models';
+import { joinSession } from './session.actions';
 
 export const SESSION_FEATURE_KEY = 'session';
 
@@ -32,6 +33,10 @@ const reducer = createReducer(
     ...state,
     loaded: false,
     error: null,
+  })),
+  on(SessionActions.joinSession, (state, action): SessionState => ({
+    ...state,
+    selectedId: action.id
   })),
   on(SessionActions.loadSessionsSuccess, (state, { sessions }): SessionState =>
     sessionAdapter.setAll(sessions, { ...state, loading: false, loaded: true })

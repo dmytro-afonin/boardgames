@@ -1,13 +1,12 @@
 {
+  "name": "feature-login",
   "projectType": "library",
   "sourceRoot": "libs/feature/login/src",
   "prefix": "feature",
   "targets": {
     "build": {
       "executor": "@nrwl/angular:ng-packagr-lite",
-      "outputs": [
-        "dist/libs/feature/login"
-      ],
+      "outputs": ["dist/libs/feature/login"],
       "options": {
         "project": "libs/feature/login/ng-package.json"
       },
@@ -23,9 +22,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/libs/feature/login"
-      ],
+      "outputs": ["coverage/libs/feature/login"],
       "options": {
         "jestConfig": "libs/feature/login/jest.config.ts",
         "passWithNoTests": true

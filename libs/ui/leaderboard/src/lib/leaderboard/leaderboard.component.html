@@ -1,0 +1,9 @@
+<mat-card>
+  <mat-card-title>Leaderboard</mat-card-title>
+
+  <mat-list role="list">
+    <mat-list-item *ngFor='let user of users' role="listitem">
+      {{user.name}} {{user.score}}
+    </mat-list-item>
+  </mat-list>
+</mat-card>

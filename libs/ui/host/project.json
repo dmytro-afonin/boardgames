@@ -1,0 +1,40 @@
+{
+  "name": "ui-host",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/ui/host/src",
+  "prefix": "ui",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:ng-packagr-lite",
+      "outputs": ["dist/libs/ui/host"],
+      "options": {
+        "project": "libs/ui/host/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/ui/host/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/ui/host/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/ui/host"],
+      "options": {
+        "jestConfig": "libs/ui/host/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["libs/ui/host/**/*.ts", "libs/ui/host/**/*.html"]
+      }
+    }
+  },
+  "tags": []
+}

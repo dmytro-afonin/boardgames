@@ -26,6 +26,11 @@ const routes: Routes = [
     path: '',
     canActivate: [AngularFireAuthGuard],
     loadChildren: () => import('@boardgames/feature/session-list').then(m => m.FeatureSessionListModule)
+  },
+  {
+    path: 'session/:sessionId',
+    canActivate: [AngularFireAuthGuard],
+    loadChildren: () => import('@boardgames/feature/session').then(m => m.FeatureSessionModule)
   }
 ];
 
