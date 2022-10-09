@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { createEffect, Actions, ofType, OnInitEffects } from '@ngrx/effects';
 import * as SessionActions from './session.actions';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { SessionEntity } from '@boardgames/data/session';
 import { Action } from '@ngrx/store';
 import { catchError, from, map, of, switchMap } from 'rxjs';
+import { SessionEntity } from './session.models';
 
 @Injectable()
 export class SessionEffects implements OnInitEffects {
