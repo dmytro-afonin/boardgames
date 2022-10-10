@@ -1,39 +1,29 @@
 <mat-card *ngFor='let session of sessions$ | async' class='mb-3'>
-  <div class='mb-5 flex'>
+  <div class='flex'>
     <mat-card-title class='flex-grow'>{{session.name}}</mat-card-title>
 
-    <button
-      mat-raised-button
-      *ngIf='!session.users[currentUser.id]'
-      (click)='joinSession(session)'
-      color='primary'
-    >
-      JOIN
-    </button>
 
-    <div *ngIf='session.users[currentUser.id]' class='flex items-center'>
+
+    <div class='flex items-center'>
+      <a
+        mat-raised-button
+        routerLink='session/{{session.id}}'
+        color='primary'
+      >
+        JOIN
+      </a>
+
       <button mat-icon-button (click)='copyLink(session)' matTooltip='copy link'>
         <mat-icon>link</mat-icon>
       </button>
-
-      <mat-icon
-        *ngIf='currentUser.id === session.ownerId'
-        matTooltip='you are the owner'
-      >
-        hotel_class
-      </mat-icon>
-
-      <mat-icon
-        matTooltip='you joined this game'
-        *ngIf='currentUser.id !== session.ownerId'
-      >
-        star
-      </mat-icon>
     </div>
   </div>
 
   <mat-chip-list aria-label="players list">
-    <mat-chip *ngFor='let user of session.usersArray'>
+    <mat-chip
+      *ngFor='let user of session.usersArray'
+      [selected]='user.id === session.ownerId'
+    >
       <img *ngIf='user.imageUrl' matChipAvatar src="{{user.imageUrl}}" referrerpolicy="no-referrer" alt="Photo of a Shiba Inu"/>
       <mat-icon matChipAvatar *ngIf='!user.imageUrl'>account_circle</mat-icon>
       {{user.name}}

@@ -7,7 +7,6 @@ import { SessionEntity, SessionFacade } from '@boardgames/data/session';
 import { filter, tap } from 'rxjs';
 import { FormBuilder, Validators } from '@angular/forms';
 import { AuthFacade, User } from '@boardgames/data/auth';
-import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {Clipboard} from '@angular/cdk/clipboard';
 
@@ -29,16 +28,9 @@ export class ContainerComponent implements OnInit {
     private readonly sessionsFacade: SessionFacade,
     private readonly fb: FormBuilder,
     private readonly authFacade: AuthFacade,
-    private readonly router: Router,
     private readonly _snackBar: MatSnackBar,
     private clipboard: Clipboard
   ) {}
-
-
-  joinSession(session: SessionEntity): void {
-    this.sessionsFacade.joinSession(session.id, this.currentUser);
-    this.router.navigate(['session', session.id]);
-  }
 
   createSession(): void {
     const value = this.formGroup.getRawValue();
