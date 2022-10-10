@@ -7,7 +7,9 @@
   "targets": {
     "build": {
       "executor": "@nrwl/angular:ng-packagr-lite",
-      "outputs": ["dist/libs/ui/hand"],
+      "outputs": [
+        "dist/libs/ui/hand"
+      ],
       "options": {
         "project": "libs/ui/hand/ng-package.json"
       },
@@ -23,7 +25,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/ui/hand"],
+      "outputs": [
+        "coverage/libs/ui/hand"
+      ],
       "options": {
         "jestConfig": "libs/ui/hand/jest.config.ts",
         "passWithNoTests": true
@@ -32,7 +36,10 @@
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["libs/ui/hand/**/*.ts", "libs/ui/hand/**/*.html"]
+        "lintFilePatterns": [
+          "libs/ui/hand/**/*.ts",
+          "libs/ui/hand/**/*.html"
+        ]
       }
     }
   },

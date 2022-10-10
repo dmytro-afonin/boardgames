@@ -6,19 +6,27 @@
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/conflict",
         "index": "apps/conflict/src/index.html",
         "main": "apps/conflict/src/main.ts",
         "polyfills": "apps/conflict/src/polyfills.ts",
         "tsConfig": "apps/conflict/tsconfig.app.json",
-        "assets": ["apps/conflict/src/favicon.ico", "apps/conflict/src/assets"],
+        "assets": [
+          "apps/conflict/src/favicon.ico",
+          "apps/conflict/src/assets",
+          "apps/conflict/src/manifest.webmanifest"
+        ],
         "styles": [
           "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
           "apps/conflict/src/styles.css"
         ],
-        "scripts": []
+        "scripts": [],
+        "serviceWorker": true,
+        "ngswConfigPath": "apps/conflict/ngsw-config.json"
       },
       "configurations": {
         "production": {
@@ -74,12 +82,17 @@
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["apps/conflict/**/*.ts", "apps/conflict/**/*.html"]
+        "lintFilePatterns": [
+          "apps/conflict/**/*.ts",
+          "apps/conflict/**/*.html"
+        ]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/conflict"],
+      "outputs": [
+        "coverage/apps/conflict"
+      ],
       "options": {
         "jestConfig": "apps/conflict/jest.config.ts",
         "passWithNoTests": true

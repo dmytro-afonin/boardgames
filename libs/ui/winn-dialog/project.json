@@ -7,7 +7,9 @@
   "targets": {
     "build": {
       "executor": "@nrwl/angular:ng-packagr-lite",
-      "outputs": ["dist/libs/ui/winn-dialog"],
+      "outputs": [
+        "dist/libs/ui/winn-dialog"
+      ],
       "options": {
         "project": "libs/ui/winn-dialog/ng-package.json"
       },
@@ -23,7 +25,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/ui/winn-dialog"],
+      "outputs": [
+        "coverage/libs/ui/winn-dialog"
+      ],
       "options": {
         "jestConfig": "libs/ui/winn-dialog/jest.config.ts",
         "passWithNoTests": true

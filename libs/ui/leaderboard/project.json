@@ -7,7 +7,9 @@
   "targets": {
     "build": {
       "executor": "@nrwl/angular:ng-packagr-lite",
-      "outputs": ["dist/libs/ui/leaderboard"],
+      "outputs": [
+        "dist/libs/ui/leaderboard"
+      ],
       "options": {
         "project": "libs/ui/leaderboard/ng-package.json"
       },
@@ -23,7 +25,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/ui/leaderboard"],
+      "outputs": [
+        "coverage/libs/ui/leaderboard"
+      ],
       "options": {
         "jestConfig": "libs/ui/leaderboard/jest.config.ts",
         "passWithNoTests": true

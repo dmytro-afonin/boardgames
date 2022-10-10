@@ -7,7 +7,9 @@
   "targets": {
     "build": {
       "executor": "@nrwl/angular:ng-packagr-lite",
-      "outputs": ["dist/libs/data/session"],
+      "outputs": [
+        "dist/libs/data/session"
+      ],
       "options": {
         "project": "libs/data/session/ng-package.json"
       },
@@ -23,7 +25,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/data/session"],
+      "outputs": [
+        "coverage/libs/data/session"
+      ],
       "options": {
         "jestConfig": "libs/data/session/jest.config.ts",
         "passWithNoTests": true

@@ -7,7 +7,9 @@
   "targets": {
     "build": {
       "executor": "@nrwl/angular:ng-packagr-lite",
-      "outputs": ["dist/libs/ui/host"],
+      "outputs": [
+        "dist/libs/ui/host"
+      ],
       "options": {
         "project": "libs/ui/host/ng-package.json"
       },
@@ -23,7 +25,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/ui/host"],
+      "outputs": [
+        "coverage/libs/ui/host"
+      ],
       "options": {
         "jestConfig": "libs/ui/host/jest.config.ts",
         "passWithNoTests": true
@@ -32,7 +36,10 @@
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["libs/ui/host/**/*.ts", "libs/ui/host/**/*.html"]
+        "lintFilePatterns": [
+          "libs/ui/host/**/*.ts",
+          "libs/ui/host/**/*.html"
+        ]
       }
     }
   },
