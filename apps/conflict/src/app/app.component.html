@@ -1,13 +1,18 @@
-<mat-toolbar color="primary">
-  <button mat-icon-button>
-    <mat-icon>home</mat-icon>
-  </button>
+<div class='h-full bg-amber-300'>
+  <mat-toolbar color="primary">
+    <button mat-icon-button>
+      <mat-icon>home</mat-icon>
+    </button>
 
-  <span class="flex-grow">Cards Against Humanity</span>
+    <span class="flex-grow">Cards Against Humanity</span>
 
-  <span *ngIf='user'>Welcome, {{user.name}} !</span>
-  <button mat-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon" (click)='googleLogin()'>
-    Google Log In
-  </button>
-</mat-toolbar>
-<router-outlet></router-outlet>
+    <span *ngIf='user'>Welcome, {{user.name}} !</span>
+    <button mat-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon" (click)='googleLogin()'>
+      Google Log In
+    </button>
+  </mat-toolbar>
+
+  <div class='container p-3'>
+    <router-outlet></router-outlet>
+  </div>
+</div>

@@ -1,62 +1,56 @@
-<div class='p-3 h-full bg-amber-500'>
-  <div class='container'>
+<mat-card *ngFor='let session of sessions$ | async' class='mb-3'>
+  <div class='mb-5 flex'>
+    <mat-card-title class='flex-grow'>{{session.name}}</mat-card-title>
 
-    <mat-card *ngFor='let session of sessions$ | async' class='mb-3'>
-      <div class='mb-5 flex flex'>
-        <span class='flex-grow'>{{session.name}}</span>
+    <button
+      mat-raised-button
+      *ngIf='!session.users[currentUser.id]'
+      (click)='joinSession(session)'
+      color='primary'
+    >
+      JOIN
+    </button>
 
-        <button
-          mat-raised-button
-          *ngIf='!session.users[currentUser.id]'
-          (click)='joinSession(session)'
-          color='primary'
-        >
-          JOIN
-        </button>
+    <div *ngIf='session.users[currentUser.id]' class='flex items-center'>
+      <button mat-icon-button (click)='copyLink(session)' matTooltip='copy link'>
+        <mat-icon>link</mat-icon>
+      </button>
 
-        <div *ngIf='session.users[currentUser.id]' class='flex items-center'>
-          <button mat-icon-button (click)='copyLink(session)' matTooltip='copy link'>
-            <mat-icon>link</mat-icon>
-          </button>
+      <mat-icon
+        *ngIf='currentUser.id === session.ownerId'
+        matTooltip='you are the owner'
+      >
+        hotel_class
+      </mat-icon>
 
-          <mat-icon
-            *ngIf='currentUser.id === session.ownerId'
-            matTooltip='you are the owner'
-          >
-            hotel_class
-          </mat-icon>
-
-          <mat-icon
-            matTooltip='you joined this game'
-            *ngIf='currentUser.id !== session.ownerId'
-          >
-            star
-          </mat-icon>
-        </div>
-      </div>
-
-      <mat-chip-list aria-label="players list">
-        <mat-chip *ngFor='let user of session.usersArray'>
-          <img *ngIf='user.imageUrl' matChipAvatar src="{{user.imageUrl}}" referrerpolicy="no-referrer" alt="Photo of a Shiba Inu"/>
-          <mat-icon matChipAvatar *ngIf='!user.imageUrl'>account_circle</mat-icon>
-          {{user.name}}
-        </mat-chip>
-      </mat-chip-list>
-    </mat-card>
-
-    <mat-card>
-      <form [formGroup]='formGroup' (ngSubmit)='createSession()'>
-        <mat-form-field appearance="standard" class='mr-4'>
-          <mat-label>Session name</mat-label>
-          <input formControlName='session' matInput placeholder="Session name">
-          <mat-hint>Hint</mat-hint>
-        </mat-form-field>
-
-        <button [disabled]='formGroup.invalid' mat-fab color="primary" aria-label="create new session">
-          <mat-icon>add</mat-icon>
-        </button>
-      </form>
-    </mat-card>
-
+      <mat-icon
+        matTooltip='you joined this game'
+        *ngIf='currentUser.id !== session.ownerId'
+      >
+        star
+      </mat-icon>
+    </div>
   </div>
-</div>
+
+  <mat-chip-list aria-label="players list">
+    <mat-chip *ngFor='let user of session.usersArray'>
+      <img *ngIf='user.imageUrl' matChipAvatar src="{{user.imageUrl}}" referrerpolicy="no-referrer" alt="Photo of a Shiba Inu"/>
+      <mat-icon matChipAvatar *ngIf='!user.imageUrl'>account_circle</mat-icon>
+      {{user.name}}
+    </mat-chip>
+  </mat-chip-list>
+</mat-card>
+
+<mat-card>
+  <form [formGroup]='formGroup' (ngSubmit)='createSession()'>
+    <mat-form-field appearance="standard" class='mr-4'>
+      <mat-label>Session name</mat-label>
+      <input formControlName='session' matInput placeholder="Session name">
+      <mat-hint>Hint</mat-hint>
+    </mat-form-field>
+
+    <button [disabled]='formGroup.invalid' mat-fab color="primary" aria-label="create new session">
+      <mat-icon>add</mat-icon>
+    </button>
+  </form>
+</mat-card>
