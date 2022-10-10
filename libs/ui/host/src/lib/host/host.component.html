@@ -1,13 +1,14 @@
 <mat-card>
-  <mat-card-title>{{session.currentQuestion.text}}</mat-card-title>
-  <mat-selection-list [multiple]="false">
-    <mat-list-option
+  <mat-card-title class='leading-normal'>{{session.currentQuestion.text}}</mat-card-title>
+  <mat-chip-list
+    [multiple]="false"
+    *ngIf='isAnswersReady'
+    [class.pointer-events-none]='user.id !== session.currentUserId'>
+    <mat-chip
       *ngFor="let u of displayedUsers"
-      [disabled]='!isAnswersReady || user.id !== session.currentUserId'
       (click)='selectOption(u.id)'
     >
-      <div *ngIf='!isAnswersReady'>???</div>
-      <div *ngIf='isAnswersReady'>{{u.selectedCards.join(' / ')}}</div>
-    </mat-list-option>
-  </mat-selection-list>
+      <div [class.cursor-pointer]='user.id === session.currentUserId'>{{u.selectedCards.join(' / ')}}</div>
+    </mat-chip>
+  </mat-chip-list>
 </mat-card>

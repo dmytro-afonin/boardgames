@@ -1,0 +1,43 @@
+{
+  "name": "ui-winn-dialog",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/ui/winn-dialog/src",
+  "prefix": "ui",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:ng-packagr-lite",
+      "outputs": ["dist/libs/ui/winn-dialog"],
+      "options": {
+        "project": "libs/ui/winn-dialog/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/ui/winn-dialog/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/ui/winn-dialog/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/ui/winn-dialog"],
+      "options": {
+        "jestConfig": "libs/ui/winn-dialog/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/ui/winn-dialog/**/*.ts",
+          "libs/ui/winn-dialog/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

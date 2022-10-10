@@ -24,7 +24,8 @@
       ],
       "@boardgames/ui/hand": ["libs/ui/hand/src/index.ts"],
       "@boardgames/ui/host": ["libs/ui/host/src/index.ts"],
-      "@boardgames/ui/leaderboard": ["libs/ui/leaderboard/src/index.ts"]
+      "@boardgames/ui/leaderboard": ["libs/ui/leaderboard/src/index.ts"],
+      "@boardgames/ui/winn-dialog": ["libs/ui/winn-dialog/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -6,12 +6,11 @@
     <span class="flex-grow">Cards Against Humanity</span>
 
     <div *ngIf='user'>
-      <span>Welcome, {{user.isAnonymous ? "Guest" : user.name}} !</span>
+      <span class='mr-3'>Welcome, {{user.isAnonymous ? "Guest" : user.name}} !</span>
 
       <button
         *ngIf='user.isAnonymous'
-        color='accent'
-        mat-button
+        mat-raised-button
         class="example-icon favorite-icon"
         aria-label="Example icon-button with heart icon"
         (click)='googleLogin()'

@@ -4,10 +4,12 @@ import {
   OnInit,
   ViewEncapsulation
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, filter, Subscription, tap } from 'rxjs';
 import { SessionEntity, SessionFacade, SessionUser } from '@boardgames/data/session';
 import { AuthFacade, User } from '@boardgames/data/auth';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogComponent } from '@boardgames/ui/winn-dialog';
 
 @Component({
   selector: 'feature-session',
@@ -27,8 +29,10 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
     private readonly sessionFacade: SessionFacade,
     private readonly auth: AuthFacade,
+    private readonly dialog: MatDialog
   ) {}
 
   startSession(): void {
@@ -59,10 +63,22 @@ export class SessionComponent implements OnInit, OnDestroy {
         const sessionUser = this.session.users[this.user.id];
         this.sessionUser = sessionUser;
         if (!sessionUser && !this.session.started) {
-          this.sessionFacade.joinSession(this.sessionId, this.user);
+          this.sessionFacade.joinSession(this.session, this.user);
           return;
         }
         this.users = Object.values(this.session.users);
+        this.users.forEach(u => {
+          if (u.score === 10) {
+            this.dialog.open(DialogComponent, {
+              data: {name: u.name},
+            }).afterClosed().pipe(
+              tap(() => {
+                this.sessionFacade.finishSession(this.sessionId);
+                this.router.navigate(['/']);
+              })
+            ).subscribe();
+          }
+        });
         this.hand = sessionUser.hand;
       })
     ).subscribe();

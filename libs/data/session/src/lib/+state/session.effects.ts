@@ -5,6 +5,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Action } from '@ngrx/store';
 import { catchError, from, map, of, switchMap } from 'rxjs';
 import { SessionEntity } from './session.models';
+import { finishSession } from './session.actions';
 
 @Injectable()
 export class SessionEffects implements OnInitEffects {
@@ -26,6 +27,13 @@ export class SessionEffects implements OnInitEffects {
     switchMap((action) => {
       const promise = this.firestore.collection<Partial<SessionEntity>>(this.SESSIONS_COLLECTION).add(action.session);
       return from(promise);
+    })
+  ), {dispatch: false});
+  finishSession$ = createEffect(() => this.actions$.pipe(
+    ofType(SessionActions.finishSession),
+    switchMap((action) => {
+      const promise = this.firestore.doc(`${this.SESSIONS_COLLECTION}/${action.id}`).delete();
+      return from(promise)
     })
   ), {dispatch: false});
 

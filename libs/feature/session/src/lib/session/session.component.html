@@ -1,34 +1,35 @@
 <div *ngIf='session'>
 
-  <div class='mb-3'>
-    <ui-leaderboard [users]='users'></ui-leaderboard>
-  </div>
+  <div class='flex mb-3'>
+    <div class='flex-shrink-0'>
+      <ui-leaderboard [session]='session'></ui-leaderboard>
+    </div>
 
-  <ng-container *ngIf='session.started'>
-    <div class='mb-3'>
+    <div class='flex-grow ml-3'>
       <ui-host
+        *ngIf='session.started'
         [session]='session'
         [user]='sessionUser'
         (winnerSelected)='selectWinner($event)'
       ></ui-host>
+
+      <mat-card *ngIf='!session.started'>
+        <button
+          mat-button
+          color='primary'
+          [disabled]='users.length < 3 || user.id !== session.ownerId'
+          (click)='startSession()'
+        >
+          Start session
+        </button>
+      </mat-card>
     </div>
+  </div>
 
-    <ui-hand
-      *ngIf='hand.length && session.currentUserId !== user.id'
-      [sessionUser]='sessionUser'
-      [question]='session.currentQuestion'
-      (optionSelected)='chooseCard($event)'
-    ></ui-hand>
-  </ng-container>
-
-  <mat-card *ngIf='!session.started'>
-    <button
-      mat-button
-      color='primary'
-      [disabled]='users.length < 3 || user.id !== session.ownerId'
-      (click)='startSession()'
-    >
-      Start session
-    </button>
-  </mat-card>
+  <ui-hand
+    *ngIf='hand.length && session.currentUserId !== user.id'
+    [sessionUser]='sessionUser'
+    [question]='session.currentQuestion'
+    (optionSelected)='chooseCard($event)'
+  ></ui-hand>
 </div>

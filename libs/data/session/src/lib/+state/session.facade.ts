@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-
 import * as SessionActions from './session.actions';
 import * as SessionSelectors from './session.selectors';
 import { Question, SessionEntity, SessionUser } from './session.models';
-import { chooseCard, createSession, joinSession, startSession } from './session.actions';
+import { chooseCard, createSession, finishSession, joinSession, startSession } from './session.actions';
 import { User } from '@boardgames/data/auth';
 import { HttpClient } from '@angular/common/http';
 
@@ -21,7 +20,6 @@ export class SessionFacade {
   loaded$ = this.store.select(SessionSelectors.selectSessionLoaded);
   allSession$ = this.store.select(SessionSelectors.selectAllSession);
   selectSessionList$ = this.store.select(SessionSelectors.selectSessionList);
-  selectedSession$ = this.store.select(SessionSelectors.selectSelected);
   selectedSessionEntities$ = this.store.select(SessionSelectors.selectSessionEntities);
 
   constructor(
@@ -54,14 +52,18 @@ export class SessionFacade {
       currentQuestion,
       ownerId: user.id,
       users: {
-        [user.id]: this.createNewSessionUser(user)
+        [user.id]: this.createNewSessionUser(user, 'Host')
       }
     }
     this.store.dispatch(createSession({ session }));
   }
 
-  createNewSessionUser(user: User): SessionUser {
-    return { ...user, hand: [], score: 0, selectedCards: [] };
+  createNewSessionUser(user: User, name = 'Guest'): SessionUser {
+    const newUser = {...user};
+    if (newUser.isAnonymous) {
+      newUser.name = name;
+    }
+    return { ...newUser, hand: [], score: 0, selectedCards: [] };
   }
 
   shuffle<T>(array: T[]): T[] {
@@ -82,9 +84,10 @@ export class SessionFacade {
     return array;
   }
 
-  joinSession(id: string, user: User): void {
-    const sessionUser = this.createNewSessionUser(user);
-    this.store.dispatch(joinSession({ id, sessionUser }));
+  joinSession(session: SessionEntity, user: User): void {
+    const number = Object.values(session.users).length;
+    const sessionUser = this.createNewSessionUser(user, `Guest #${number}`);
+    this.store.dispatch(joinSession({ id: session.id, sessionUser }));
   }
 
   startSession(session: SessionEntity): void {
@@ -105,14 +108,17 @@ export class SessionFacade {
   }
   selectWinner(session: SessionEntity, userId: string): void {
     const clone: SessionEntity = JSON.parse(JSON.stringify(session));
+    clone.users[userId].score++;
     clone.currentUserId = userId;
     clone.currentQuestion = clone.questions.pop() as Question;
-    clone.users[userId].score++;
     Object.values(clone.users).forEach(u => {
       const user = clone.users[u.id];
       user.hand.push(...clone.answers.splice(0, user.selectedCards.length));
       user.selectedCards = [];
     });
     this.store.dispatch(startSession({ session: clone }));
+  }
+  finishSession(id: string): void {
+    this.store.dispatch(finishSession({ id }));
   }
 }

@@ -11,6 +11,7 @@
     "feature-session-list": "libs/feature/session-list",
     "ui-hand": "libs/ui/hand",
     "ui-host": "libs/ui/host",
-    "ui-leaderboard": "libs/ui/leaderboard"
+    "ui-leaderboard": "libs/ui/leaderboard",
+    "ui-winn-dialog": "libs/ui/winn-dialog"
   }
 }

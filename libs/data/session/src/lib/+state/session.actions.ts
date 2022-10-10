@@ -27,6 +27,11 @@ export const startSession = createAction(
   props<{ session: SessionEntity; }>()
 );
 
+export const finishSession = createAction(
+  '[Session/Firestore] finishSession',
+  props<{ id: string; }>()
+);
+
 
 export const chooseCard = createAction(
   '[Session/Firestore] chooseCard',

@@ -5,7 +5,7 @@
       [disabled]='sessionUser.selectedCards.length >= question.options'
       (click)='optionSelected.next(i)'
     >
-      {{option}}
+      <div [class.cursor-pointer]='sessionUser.selectedCards.length < question.options'>{{option}}</div>
     </mat-chip>
   </mat-chip-list>
 </mat-card>
