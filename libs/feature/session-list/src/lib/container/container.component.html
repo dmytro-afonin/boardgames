@@ -1,10 +1,8 @@
 <mat-card *ngFor='let session of sessions$ | async' class='mb-3'>
-  <div class='flex'>
+  <div class='flex items-center mb-3'>
     <mat-card-title class='flex-grow'>{{session.name}}</mat-card-title>
 
-
-
-    <div class='flex items-center'>
+    <div class='mr-3'>
       <a
         mat-raised-button
         routerLink='session/{{session.id}}'
@@ -12,11 +10,11 @@
       >
         JOIN
       </a>
-
-      <button mat-icon-button (click)='copyLink(session)' matTooltip='copy link'>
-        <mat-icon>link</mat-icon>
-      </button>
     </div>
+
+    <button mat-icon-button (click)='copyLink(session)' matTooltip='share link'>
+      <mat-icon>link</mat-icon>
+    </button>
   </div>
 
   <mat-chip-list aria-label="players list">

@@ -5,7 +5,8 @@
 export interface User {
   id: string;
   name: string;
-  imageUrl?: string;
+  imageUrl: string;
+  isAnonymous: boolean;
 }
 
 export interface AuthEntity {

@@ -41,8 +41,13 @@ export class ContainerComponent implements OnInit {
   copyLink(session: SessionEntity): void {
     const link = `${window.location.origin}/session/${session.id}`;
     this.clipboard.copy(link);
-    window.open(`https://t.me/share/url?url=${link}`, '_blank');
-    this._snackBar.open(`${link} copied to clipboard`, 'Okay', {duration: 3000});
+
+    this._snackBar.open(`${link} copied to clipboard`, 'Share in Telegram', {duration: 5000})
+      .onAction()
+      .pipe(tap(() => {
+        window.open(`https://t.me/share/url?url=${link}&text=Join Our Party Game!`, '_blank');
+      }))
+      .subscribe();
   }
 
   ngOnInit(): void {

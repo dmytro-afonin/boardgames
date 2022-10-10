@@ -15,15 +15,13 @@ export class AuthEffects implements OnInitEffects {
       ofType(AuthActions.initAuth),
       switchMap(() => this.auth.authState.pipe(
         map((firebaseUser: firebase.User | null) => {
-          console.log({firebaseUser});
           if (firebaseUser) {
             const user: User = {
               id: firebaseUser.uid,
-              name: firebaseUser.displayName ?? firebaseUser.email ?? firebaseUser.uid
+              name: firebaseUser.displayName ?? firebaseUser.email ?? firebaseUser.uid,
+              imageUrl: firebaseUser.photoURL ?? '',
+              isAnonymous: firebaseUser.isAnonymous
             };
-            if (firebaseUser.photoURL) {
-              user.imageUrl = firebaseUser.photoURL;
-            }
             return AuthActions.loadAuthSuccess({ user });
           }
           return AuthActions.anonymousLogin();
