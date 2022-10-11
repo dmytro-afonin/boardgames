@@ -1,11 +1,11 @@
 <div *ngIf='session'>
 
-  <div class='flex mb-3'>
+  <div class='sm:flex mb-3'>
     <div class='flex-shrink-0'>
       <ui-leaderboard [session]='session'></ui-leaderboard>
     </div>
 
-    <div class='flex-grow ml-3'>
+    <div class='flex-grow mt-3 sm:ml-3 sm:mt-0'>
       <ui-host
         *ngIf='session.started'
         [session]='session'
@@ -13,14 +13,27 @@
         (winnerSelected)='selectWinner($event)'
       ></ui-host>
 
-      <mat-card *ngIf='!session.started'>
+      <mat-card *ngIf='!session.started' class='dark:bg-slate-700 dark:text-slate-100'>
+        <mat-card-title class='leading-normal text-center'>
+          <em *ngIf='users.length < 3'>
+            {{users.length}}/3 required users joined
+          </em>
+
+          <em *ngIf='user.id !== session.ownerId'>
+            <br/>
+            Please wait until the host start session
+          </em>
+        </mat-card-title>
+
         <button
-          mat-button
+          class='w-full'
+          *ngIf='user.id === session.ownerId'
+          mat-raised-button
           color='primary'
-          [disabled]='users.length < 3 || user.id !== session.ownerId'
+          [disabled]='users.length < 3'
           (click)='startSession()'
         >
-          Start session
+          Play
         </button>
       </mat-card>
     </div>

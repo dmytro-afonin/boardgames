@@ -1,5 +1,5 @@
-<mat-card>
-  <mat-card-title>Leaderboard</mat-card-title>
+<mat-card class='dark:bg-slate-700 dark:text-slate-100'>
+  <mat-card-title>Players</mat-card-title>
 
   <mat-chip-list class="mat-chip-list-stacked" aria-label="Color selection">
     <mat-chip *ngFor="let user of displayedUsers" [selected]='!!user.color' [color]="user.color">
