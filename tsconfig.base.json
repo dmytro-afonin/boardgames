@@ -22,6 +22,7 @@
       "@boardgames/feature/session-list": [
         "libs/feature/session-list/src/index.ts"
       ],
+      "@boardgames/ui/card": ["libs/ui/card/src/index.ts"],
       "@boardgames/ui/hand": ["libs/ui/hand/src/index.ts"],
       "@boardgames/ui/host": ["libs/ui/host/src/index.ts"],
       "@boardgames/ui/leaderboard": ["libs/ui/leaderboard/src/index.ts"],

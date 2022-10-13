@@ -1,4 +1,4 @@
-<mat-card class='dark:bg-slate-700 dark:text-slate-100'>
+<ui-card>
   <mat-chip-list aria-label="card selection">
     <mat-chip
       *ngFor='let option of sessionUser.hand; let i = index;'
@@ -8,4 +8,4 @@
       <div [class.cursor-pointer]='sessionUser.selectedCards.length < question.options'>{{option}}</div>
     </mat-chip>
   </mat-chip-list>
-</mat-card>
+</ui-card>

@@ -13,7 +13,7 @@
         (winnerSelected)='selectWinner($event)'
       ></ui-host>
 
-      <mat-card *ngIf='!session.started' class='dark:bg-slate-700 dark:text-slate-100'>
+      <ui-card *ngIf='!session.started'>
         <mat-card-title class='leading-normal text-center'>
           <em *ngIf='users.length < 3'>
             {{users.length}}/3 required users joined
@@ -35,7 +35,7 @@
         >
           Play
         </button>
-      </mat-card>
+      </ui-card>
     </div>
   </div>
 

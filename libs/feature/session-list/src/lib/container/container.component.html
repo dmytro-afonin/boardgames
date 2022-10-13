@@ -1,35 +1,37 @@
-<mat-card *ngFor='let session of sessions$ | async' class='mb-3'>
-  <div class='flex items-center mb-3'>
-    <mat-card-title class='flex-grow'>{{session.name}}</mat-card-title>
+<div *ngFor='let session of sessions$ | async' class='mb-3'>
+  <ui-card>
+    <div class='flex items-center mb-3'>
+      <mat-card-title class='flex-grow'>{{session.name}}</mat-card-title>
 
-    <div class='mr-3'>
-      <a
-        mat-raised-button
-        routerLink='session/{{session.id}}'
-        color='primary'
-      >
-        JOIN
-      </a>
+      <div class='mr-3'>
+        <a
+          mat-raised-button
+          routerLink='session/{{session.id}}'
+          color='primary'
+        >
+          JOIN
+        </a>
+      </div>
+
+      <button mat-icon-button (click)='copyLink(session)' matTooltip='share link'>
+        <mat-icon>link</mat-icon>
+      </button>
     </div>
 
-    <button mat-icon-button (click)='copyLink(session)' matTooltip='share link'>
-      <mat-icon>link</mat-icon>
-    </button>
-  </div>
+    <mat-chip-list aria-label="players list">
+      <mat-chip
+        *ngFor='let user of session.usersArray'
+        [selected]='user.id === session.ownerId'
+      >
+        <img *ngIf='user.imageUrl' matChipAvatar src="{{user.imageUrl}}" referrerpolicy="no-referrer" alt="Photo of a Shiba Inu"/>
+        <mat-icon matChipAvatar *ngIf='!user.imageUrl'>account_circle</mat-icon>
+        {{user.name}}
+      </mat-chip>
+    </mat-chip-list>
+  </ui-card>
+</div>
 
-  <mat-chip-list aria-label="players list">
-    <mat-chip
-      *ngFor='let user of session.usersArray'
-      [selected]='user.id === session.ownerId'
-    >
-      <img *ngIf='user.imageUrl' matChipAvatar src="{{user.imageUrl}}" referrerpolicy="no-referrer" alt="Photo of a Shiba Inu"/>
-      <mat-icon matChipAvatar *ngIf='!user.imageUrl'>account_circle</mat-icon>
-      {{user.name}}
-    </mat-chip>
-  </mat-chip-list>
-</mat-card>
-
-<mat-card>
+<ui-card>
   <form [formGroup]='formGroup' (ngSubmit)='createSession()'>
     <mat-form-field appearance="standard" class='mr-4'>
       <mat-label>Session name</mat-label>
@@ -41,4 +43,4 @@
       <mat-icon>add</mat-icon>
     </button>
   </form>
-</mat-card>
+</ui-card>
