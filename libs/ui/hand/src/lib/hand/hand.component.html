@@ -3,6 +3,7 @@
     <mat-chip
       *ngFor='let option of sessionUser.hand; let i = index;'
       [disabled]='sessionUser.selectedCards.length >= question.options'
+      [class.pointer-events-none]='sessionUser.selectedCards.length >= question.options'
       (click)='optionSelected.next(i)'
     >
       <div [class.cursor-pointer]='sessionUser.selectedCards.length < question.options'>{{option}}</div>
