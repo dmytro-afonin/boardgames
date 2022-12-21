@@ -1,12 +1,12 @@
 <ui-card>
-  <mat-chip-list aria-label="card selection">
-    <mat-chip
+  <mat-chip-listbox aria-label="card selection">
+    <mat-chip-option
       *ngFor='let option of sessionUser.hand; let i = index;'
       [disabled]='sessionUser.selectedCards.length >= question.options'
       [class.pointer-events-none]='sessionUser.selectedCards.length >= question.options'
-      (click)='optionSelected.next(i)'
+      (selectionChange)='optionSelected.next(i)'
     >
       <div [class.cursor-pointer]='sessionUser.selectedCards.length < question.options'>{{option}}</div>
-    </mat-chip>
-  </mat-chip-list>
+    </mat-chip-option>
+  </mat-chip-listbox>
 </ui-card>

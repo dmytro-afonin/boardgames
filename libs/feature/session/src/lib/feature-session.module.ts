@@ -5,9 +5,9 @@ import { RouterModule, Routes } from '@angular/router';
 import { UiLeaderboardModule } from '@boardgames/ui/leaderboard';
 import { UiHandModule } from '@boardgames/ui/hand';
 import { UiHostModule } from '@boardgames/ui/host';
+import { UiCardModule } from '@boardgames/ui/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
-import { UiCardModule } from '@boardgames/ui/card';
 import { MatCardModule } from '@angular/material/card';
 
 const routes: Routes = [

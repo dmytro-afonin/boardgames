@@ -1,8 +1,8 @@
 <ui-card>
   <mat-card-title>Players</mat-card-title>
 
-  <mat-chip-list class="mat-chip-list-stacked" aria-label="Color selection">
-    <mat-chip *ngFor="let user of displayedUsers" [selected]='!!user.color' [color]="user.color">
+  <mat-chip-listbox class="mat-mdc-chip-set-stacked" aria-label="Color selection">
+    <mat-chip *ngFor="let user of displayedUsers" [color]="user.color">
       <img *ngIf='user.imageUrl' matChipAvatar src="{{user.imageUrl}}" referrerpolicy="no-referrer" alt="{{user.imageUrl}}"/>
       <mat-icon matChipAvatar *ngIf='!user.imageUrl'>account_circle</mat-icon>
       <span class='flex flex-nowrap flex-grow items-center'>
@@ -11,5 +11,5 @@
         <strong class='text-xl'>{{user.score}}</strong>
       </span>
     </mat-chip>
-  </mat-chip-list>
+  </mat-chip-listbox>
 </ui-card>

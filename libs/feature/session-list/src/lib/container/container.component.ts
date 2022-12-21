@@ -7,8 +7,8 @@ import { SessionEntity, SessionFacade } from '@boardgames/data/session';
 import { filter, tap } from 'rxjs';
 import { FormBuilder, Validators } from '@angular/forms';
 import { AuthFacade, User } from '@boardgames/data/auth';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import {Clipboard} from '@angular/cdk/clipboard';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'feature-container',

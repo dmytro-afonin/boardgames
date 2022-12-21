@@ -1,14 +1,14 @@
 <ui-card>
   <mat-card-title class='leading-normal'>{{session.currentQuestion.text}}</mat-card-title>
-  <mat-chip-list
+  <mat-chip-listbox
     [multiple]="false"
     *ngIf='isAnswersReady'
     [class.pointer-events-none]='user.id !== session.currentUserId'>
-    <mat-chip
+    <mat-chip-option
       *ngFor="let u of displayedUsers"
-      (click)='selectOption(u.id)'
+      (selectionChange)='selectOption(u.id)'
     >
       <div [class.cursor-pointer]='user.id === session.currentUserId'>{{u.selectedCards.join(' / ')}}</div>
-    </mat-chip>
-  </mat-chip-list>
+    </mat-chip-option>
+  </mat-chip-listbox>
 </ui-card>

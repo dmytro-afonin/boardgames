@@ -8,8 +8,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, filter, Subscription, tap } from 'rxjs';
 import { SessionEntity, SessionFacade, SessionUser } from '@boardgames/data/session';
 import { AuthFacade, User } from '@boardgames/data/auth';
-import { MatDialog } from '@angular/material/dialog';
 import { DialogComponent } from '@boardgames/ui/winn-dialog';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'feature-session',

@@ -17,8 +17,9 @@ import { DataSessionModule } from '@boardgames/data/session';
 import { AngularFireAuthGuard } from '@angular/fire/compat/auth-guard';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
 import { ServiceWorkerModule } from '@angular/service-worker';
+import { MatCardModule } from '@angular/material/card';
 
 const routes: Routes = [
   {
@@ -60,7 +61,8 @@ const routes: Routes = [
       // Register the ServiceWorker as soon as the application is stable
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000'
-    })
+    }),
+    MatCardModule
   ],
   bootstrap: [AppComponent],
 })

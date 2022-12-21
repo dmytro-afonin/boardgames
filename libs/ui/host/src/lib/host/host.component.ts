@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { SessionEntity, SessionUser } from '@boardgames/data/session';
 import { Subject } from 'rxjs';
-import { MatChipListChange } from '@angular/material/chips';
+import { MatLegacyChipListChange as MatChipListChange } from '@angular/material/legacy-chips';
 
 @Component({
   selector: 'ui-host',

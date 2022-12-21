@@ -18,22 +18,22 @@
       </button>
     </div>
 
-    <mat-chip-list aria-label="players list">
+    <mat-chip-listbox aria-label="players list">
       <mat-chip
         *ngFor='let user of session.usersArray'
-        [selected]='user.id === session.ownerId'
+        [color]='user.id === session.ownerId ? "primary" : undefined'
       >
         <img *ngIf='user.imageUrl' matChipAvatar src="{{user.imageUrl}}" referrerpolicy="no-referrer" alt="Photo of a Shiba Inu"/>
         <mat-icon matChipAvatar *ngIf='!user.imageUrl'>account_circle</mat-icon>
         {{user.name}}
       </mat-chip>
-    </mat-chip-list>
+    </mat-chip-listbox>
   </ui-card>
 </div>
 
 <ui-card>
   <form [formGroup]='formGroup' (ngSubmit)='createSession()'>
-    <mat-form-field appearance="standard" class='mr-4'>
+    <mat-form-field appearance="fill" class='mr-4'>
       <mat-label>Session name</mat-label>
       <input formControlName='session' matInput placeholder="Session name">
       <mat-hint>Hint</mat-hint>
