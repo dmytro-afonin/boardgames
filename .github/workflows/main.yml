@@ -9,10 +9,10 @@ on:
 
 jobs:
   init:
+    runs-on: 'ubuntu-latest'
     strategy:
       matrix:
-        commands: [lint, test, build]
-    runs-on: 'ubuntu-latest'
+        command: [lint, test, build]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
