@@ -8,7 +8,8 @@
     "start": "nx serve",
     "build": "nx build",
     "lint": "nx lint",
-    "test": "nx test"
+    "test": "nx test",
+    "deploy": "nx deploy"
   },
   "private": true,
   "dependencies": {

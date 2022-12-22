@@ -21,3 +21,22 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run ${{ matrix.command }}
+      - uses: actions/upload-artifact@v3
+        if: ${{ matrix.command == build }}
+        with:
+          name: dist
+          path: dist
+
+  deploy:
+    needs: init
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+          cache: 'npm'
+      - uses: actions/download-artifact@v3
+        with:
+          name: dist
+      - run: npm run deploy
