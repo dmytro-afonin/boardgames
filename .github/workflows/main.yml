@@ -22,7 +22,7 @@ jobs:
       - run: npm ci
       - run: npm run ${{ matrix.command }}
       - uses: actions/upload-artifact@v3
-        if: ${{ matrix.command == build }}
+        if: ${{ matrix.command == 'build' }}
         with:
           name: dist
           path: dist
