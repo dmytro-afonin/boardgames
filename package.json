@@ -7,7 +7,9 @@
     "postinstall": "node ./decorate-angular-cli.js && ngcc --properties es2022 browser module main",
     "start": "nx serve",
     "build": "nx build",
-    "test": "nx test"
+    "lint": "nx lint",
+    "test": "nx test",
+    "deploy": "nx deploy"
   },
   "private": true,
   "dependencies": {
