@@ -17,9 +17,9 @@ import { DataSessionModule } from '@boardgames/data/session';
 import { AngularFireAuthGuard } from '@angular/fire/compat/auth-guard';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
 
 const routes: Routes = [
   {
@@ -55,6 +55,7 @@ const routes: Routes = [
     DataSessionModule,
     MatToolbarModule,
     MatIconModule,
+    MatCardModule,
     MatButtonModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
@@ -62,7 +63,6 @@ const routes: Routes = [
       // or after 30 seconds (whichever comes first).
       registrationStrategy: 'registerWhenStable:30000'
     }),
-    MatCardModule
   ],
   bootstrap: [AppComponent],
 })
