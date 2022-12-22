@@ -15,14 +15,6 @@ export class AuthFacade {
 
   constructor(private readonly store: Store) {}
 
-  /**
-   * Use the initialization action to perform one
-   * or more tasks in your Effects.
-   */
-  init() {
-    this.store.dispatch(AuthActions.initAuth());
-  }
-
   anonymousLogin() {
     this.store.dispatch(AuthActions.anonymousLogin());
   }

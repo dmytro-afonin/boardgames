@@ -14,7 +14,6 @@ export class SessionFacade {
    * and expose them as observables through the facade.
    */
 
-
   questions: Question[] = [];
   answers: string[] = [];
   loaded$ = this.store.select(SessionSelectors.selectSessionLoaded);
@@ -34,13 +33,6 @@ export class SessionFacade {
     });
   }
 
-  /**
-   * Use the initialization action to perform one
-   * or more tasks in your Effects.
-   */
-  init() {
-    this.store.dispatch(SessionActions.initSessions());
-  }
   createSession(name: string, user: User): void {
     const currentQuestion = this.questions.pop() as Question;
     const session: Partial<SessionEntity> = {

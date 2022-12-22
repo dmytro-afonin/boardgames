@@ -6,7 +6,6 @@
     "conflict-e2e": "apps/conflict-e2e",
     "data-auth": "libs/data/auth",
     "data-session": "libs/data/session",
-    "feature-login": "libs/feature/login",
     "feature-session": "libs/feature/session",
     "feature-session-list": "libs/feature/session-list",
     "ui-card": "libs/ui/card",

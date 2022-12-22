@@ -58,11 +58,17 @@ export class SessionComponent implements OnInit, OnDestroy {
         this.sessionId = params['sessionId'];
         this.session = sessions[this.sessionId];
         if (!this.session) {
+          // todo tell the user the game is not exists - redirect to main page
           return;
         }
         const sessionUser = this.session.users[this.user.id];
         this.sessionUser = sessionUser;
         if (!sessionUser && !this.session.started) {
+          // todo if session started make request to join the game
+          // todo add ability to delete user
+          // todo add ability to block/unblock user by ID
+          // todo add ability to choose the name in the game
+          // todo add ability to choose avatar
           this.sessionFacade.joinSession(this.session, this.user);
           return;
         }
