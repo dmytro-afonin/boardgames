@@ -39,4 +39,5 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: dist
+      - run: npm ci
       - run: npm run deploy
