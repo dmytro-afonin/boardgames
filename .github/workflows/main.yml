@@ -42,4 +42,3 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_CONFLICT_30F20 }}'
           channelId: live
           projectId: conflict-30f20
-
