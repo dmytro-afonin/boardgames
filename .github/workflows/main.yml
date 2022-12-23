@@ -1,4 +1,4 @@
-name: 'Main workflow v2'
+name: 'One workflow to rule them all'
 
 on:
   workflow_dispatch:
@@ -20,6 +20,7 @@ jobs:
           node-version: lts/*
           cache: 'npm'
       - run: npm ci
+      - run: find ./apps -type f -name "environment.*.ts" -print0 | xargs -0 sed -i 's/FIREBASE_API_KEY/${{ secrets.FIREBASE_API_KEY }}/'
       - run: npm run ${{ matrix.command }}
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.command == 'build' }}
@@ -29,6 +30,7 @@ jobs:
 
   deploy:
     needs: init
+    if: "${{ github.event == 'push' }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -41,4 +43,20 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_CONFLICT_30F20 }}'
           channelId: live
+          projectId: conflict-30f20
+
+  preview:
+    needs: init
+    if: "${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_CONFLICT_30F20 }}'
           projectId: conflict-30f20
