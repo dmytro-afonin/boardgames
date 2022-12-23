@@ -1,0 +1,44 @@
+<div class='h-full bg-amber-300 dark:bg-black'>
+  <mat-toolbar color="primary">
+    <div  class='dark:text-slate-100 flex w-full items-center'>
+      <a mat-icon-button routerLink='/'>
+        <mat-icon>home</mat-icon>
+      </a>
+      <span class="flex-grow"><span class='hidden sm:block'>Evolution</span></span>
+
+      <ng-container *ngIf='user'>
+        <div *ngIf='user.isAnonymous' class='flex'>
+          <span class='mr-3 hidden sm:block'>Guest</span>
+
+          <button
+            mat-raised-button
+            class="example-icon favorite-icon"
+            aria-label="Example icon-button with heart icon"
+            (click)='googleLogin()'
+          >
+            Sign in With Google
+          </button>
+        </div>
+
+        <div *ngIf='!user.isAnonymous' class='flex items-center'>
+          <span class='mr-3 hidden sm:block'>{{user.name}}</span>
+
+          <mat-icon *ngIf='!user.imageUrl'>account_circle</mat-icon>
+          <img
+            class='w-6 h-6 rounded-full overflow-hidden'
+            *ngIf='user.imageUrl'
+            src='{{user.imageUrl}}'
+            referrerpolicy="no-referrer"
+            alt='{{user.name}}'
+          />
+
+        </div>
+
+      </ng-container>
+    </div>
+  </mat-toolbar>
+
+  <div class='container p-3'>
+    <router-outlet></router-outlet>
+  </div>
+</div>

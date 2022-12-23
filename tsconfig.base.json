@@ -17,6 +17,9 @@
     "paths": {
       "@boardgames/data/auth": ["libs/data/auth/src/index.ts"],
       "@boardgames/data/session": ["libs/data/session/src/index.ts"],
+      "@boardgames/feature/evolution-session-list": [
+        "libs/feature/evolution-session-list/src/index.ts"
+      ],
       "@boardgames/feature/session": ["libs/feature/session/src/index.ts"],
       "@boardgames/feature/session-list": [
         "libs/feature/session-list/src/index.ts"
