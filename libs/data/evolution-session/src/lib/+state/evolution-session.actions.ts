@@ -10,6 +10,11 @@ export const loadEvolutionSessionSuccess = createAction(
   props<{ evolutionSession: EvolutionSessionEntity[] }>()
 );
 
+export const createEvolutionSession = createAction(
+  '[EvolutionSession/API] Create EvolutionSession',
+  props<{ evolutionSession: Partial<EvolutionSessionEntity> }>()
+);
+
 export const loadEvolutionSessionFailure = createAction(
   '[EvolutionSession/API] Load EvolutionSession Failure',
   props<{ error: string }>()

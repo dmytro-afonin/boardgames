@@ -35,6 +35,8 @@ export class ContainerComponent implements OnInit, OnDestroy {
   }
 
   createSession(): void {
-    alert('here we can create session');
+    const value = this.formGroup.getRawValue();
+    this.sessionsFacade.createSession(String(value.session), this.currentUser);
+    this.formGroup.reset();
   }
 }

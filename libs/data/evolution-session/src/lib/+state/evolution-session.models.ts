@@ -62,6 +62,7 @@ export interface Player {
 
 export interface EvolutionSessionEntity {
   id: string | number; // Primary ID
+  started: boolean;
   name: string;
   cards: HandCard[];
   currentPlayer: string;
@@ -71,7 +72,13 @@ export interface EvolutionSessionEntity {
   players: Record<string, Player>;
 }
 
-export const CARDS_BASE_SCHEME = [
+export interface CardSchemeItem {
+  type1: CardTypes;
+  type2?: CardTypes;
+  count: number;
+}
+
+export const CARDS_BASE_SCHEME: CardSchemeItem[] = [
   { type1: CardTypes.MIMICRY                                          , count: 4 },
   { type1: CardTypes.SWIMMING                                         , count: 8 },
   { type1: CardTypes.RUNNING                                          , count: 4 },

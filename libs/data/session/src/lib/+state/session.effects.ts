@@ -5,7 +5,6 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Action } from '@ngrx/store';
 import { catchError, from, map, of, switchMap } from 'rxjs';
 import { SessionEntity } from './session.models';
-import { finishSession } from './session.actions';
 
 @Injectable()
 export class SessionEffects implements OnInitEffects {

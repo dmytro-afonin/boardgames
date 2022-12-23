@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import * as SessionActions from './session.actions';
 import * as SessionSelectors from './session.selectors';
 import { Question, SessionEntity, SessionUser } from './session.models';
 import { chooseCard, createSession, finishSession, joinSession, startSession } from './session.actions';
