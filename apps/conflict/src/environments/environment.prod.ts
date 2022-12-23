@@ -5,7 +5,7 @@ export const environment = {
     databaseURL: 'https://conflict-30f20-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'conflict-30f20.appspot.com',
     locationId: 'europe-west',
-    apiKey: 'AIzaSyBxFJaaMk2tlgGucGHs9TubRYZ9TLN5KZI',
+    apiKey: 'FIREBASE_API_KEY',
     authDomain: 'conflict-30f20.firebaseapp.com',
     messagingSenderId: '448371531967',
     measurementId: 'G-99MQ01ZKX7',
