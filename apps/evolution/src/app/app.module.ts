@@ -16,6 +16,8 @@ import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
 import { HttpClientModule } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { DataAuthModule } from '@boardgames/data/auth';
+import { DataEvolutionSessionModule } from '@boardgames/data/evolution-session';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 const routes: Routes = [
   {
@@ -29,6 +31,7 @@ const routes: Routes = [
   imports: [
     HttpClientModule,
     BrowserModule,
+    BrowserAnimationsModule,
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
@@ -44,6 +47,7 @@ const routes: Routes = [
       paramsInheritanceStrategy: 'always'
     }),
     DataAuthModule,
+    DataEvolutionSessionModule
   ],
   providers: [],
   bootstrap: [AppComponent],

@@ -1,1 +1,40 @@
-<p>container works!</p>
+<ui-card *ngFor='let session of sessions$ | async' class='mb-3'>
+  <div class='flex items-center mb-3'>
+    <mat-card-title class='flex-grow'>{{session.name}}</mat-card-title>
+
+    <div class='mr-3'>
+      <a
+        mat-raised-button
+        routerLink='session/{{session.id}}'
+        color='primary'
+      >
+        JOIN
+      </a>
+    </div>
+  </div>
+
+  <mat-chip-listbox aria-label="players list">
+    <mat-chip
+      *ngFor='let user of session.usersArray'
+      [color]='user.id === session.host ? "primary" : undefined'
+    >
+      <img *ngIf='user.imageUrl' matChipAvatar src="{{user.imageUrl}}" referrerpolicy="no-referrer" alt="{{user.name}}"/>
+      <mat-icon matChipAvatar *ngIf='!user.imageUrl'>account_circle</mat-icon>
+      {{user.name}}
+    </mat-chip>
+  </mat-chip-listbox>
+</ui-card>
+
+<ui-card>
+  <form [formGroup]='formGroup' (ngSubmit)='createSession()'>
+    <mat-form-field appearance="fill" class='mr-4'>
+      <mat-label>Session name</mat-label>
+      <input formControlName='session' matInput placeholder="Session name">
+      <mat-hint>Hint</mat-hint>
+    </mat-form-field>
+
+    <button [disabled]='formGroup.invalid' mat-fab color="primary" aria-label="create new session">
+      <mat-icon>add</mat-icon>
+    </button>
+  </form>
+</ui-card>

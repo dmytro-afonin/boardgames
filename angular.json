@@ -5,6 +5,7 @@
     "conflict": "apps/conflict",
     "conflict-e2e": "apps/conflict-e2e",
     "data-auth": "libs/data/auth",
+    "data-evolution-session": "libs/data/evolution-session",
     "data-session": "libs/data/session",
     "evolution": "apps/evolution",
     "evolution-e2e": "apps/evolution-e2e",

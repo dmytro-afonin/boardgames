@@ -16,6 +16,9 @@
     "baseUrl": ".",
     "paths": {
       "@boardgames/data/auth": ["libs/data/auth/src/index.ts"],
+      "@boardgames/data/evolution-session": [
+        "libs/data/evolution-session/src/index.ts"
+      ],
       "@boardgames/data/session": ["libs/data/session/src/index.ts"],
       "@boardgames/feature/evolution-session-list": [
         "libs/feature/evolution-session-list/src/index.ts"
