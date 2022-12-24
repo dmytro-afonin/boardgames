@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { createEffect, Actions, ofType, OnInitEffects } from '@ngrx/effects';
 import * as EvolutionSessionActions from './evolution-session.actions';
 import { Action } from '@ngrx/store';
-import { catchError, from, map, of, switchMap } from 'rxjs';
+import { catchError, from, map, of, switchMap, tap } from 'rxjs';
 import { EvolutionSessionEntity } from '@boardgames/data/evolution-session';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 
@@ -29,9 +29,20 @@ export class EvolutionSessionEffects implements OnInitEffects {
   createSession$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(EvolutionSessionActions.createEvolutionSession),
-      switchMap((action) => {
-        const promise = this.firestore.collection<Partial<EvolutionSessionEntity>>(this.SESSIONS_COLLECTION).add(action.evolutionSession);
-        return from(promise);
+      tap((action) => {
+        this.firestore
+          .collection<Partial<EvolutionSessionEntity>>(this.SESSIONS_COLLECTION)
+          .add(action.evolutionSession);
+      })
+    )
+  }, {dispatch: false});
+  updateSession$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(EvolutionSessionActions.updateSession),
+      tap((action) => {
+        this.firestore
+          .doc(`${this.SESSIONS_COLLECTION}/${action.evolutionSession.id}`)
+          .set(action.evolutionSession, {merge: true});
       })
     )
   }, {dispatch: false});

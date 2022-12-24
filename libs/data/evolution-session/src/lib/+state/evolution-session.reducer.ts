@@ -44,7 +44,10 @@ const reducer = createReducer(
   on(
     EvolutionSessionActions.loadEvolutionSessionFailure,
     (state, { error }) => ({ ...state, error })
-  )
+  ),
+  on(EvolutionSessionActions.setSelectedSession, (state, { selectedId }): EvolutionSessionState => {
+    return {...state, selectedId};
+  })
 );
 
 export function evolutionSessionReducer(

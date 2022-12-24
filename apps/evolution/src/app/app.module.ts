@@ -24,6 +24,11 @@ const routes: Routes = [
     path: '',
     canActivate: [AngularFireAuthGuard],
     loadChildren: () => import('@boardgames/feature/evolution-session-list').then(m => m.FeatureEvolutionSessionListModule)
+  },
+  {
+    path: 'session/:sessionId',
+    canActivate: [AngularFireAuthGuard],
+    loadChildren: () => import('@boardgames/feature/evolution-session').then(m => m.FeatureEvolutionSessionModule)
   }
 ];
 @NgModule({

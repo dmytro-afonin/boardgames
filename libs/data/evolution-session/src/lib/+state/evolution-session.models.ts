@@ -29,29 +29,58 @@ export enum CardTypes {
   HIBERNATION_ABILITY
 }
 
+
+export const WEIGHT_PROPERTY_MAP: Record<CardTypes, number> = {
+  [CardTypes.MIMICRY]: 0,
+  [CardTypes.SWIMMING]: 0,
+  [CardTypes.RUNNING]: 0,
+  [CardTypes.SCAVENGER]: 0,
+  [CardTypes.SYMBIOSYS]: 0,
+  [CardTypes.PIRACY]: 0,
+  [CardTypes.TAIL_LOSS]: 0,
+  [CardTypes.POISONOUS]: 0,
+  [CardTypes.PARASITE]: 2,
+  [CardTypes.CARNIVOROUS]: 1,
+  [CardTypes.FAT_TISSUE]: 0,
+  [CardTypes.HIGH_BODY_WEIGHT]: 1,
+  [CardTypes.COMMUNICATION]: 0,
+  [CardTypes.COOPERATION]: 0,
+  [CardTypes.BURROWING]: 0,
+  [CardTypes.CAMOUFLAGE]: 0,
+  [CardTypes.SHARP_VISION]: 0,
+  [CardTypes.GRAZING]: 0,
+  [CardTypes.HIBERNATION_ABILITY]: 0
+}
+
+
 export interface HandCard {
   type1: CardTypes,
   type2?: CardTypes
 }
 
-export interface Properties {
+export interface DoubleProperty {
   animal1: number;
-  animal2?: number;
+  animal2: number;
   property: CardTypes;
 }
 
 export interface Animal {
   index: number;
   food: number;
+  hibernation?: boolean;
+  hibernationCooldown?: number;
+  properties: CardTypes[]
 }
 
 export interface Player {
+  order: number;
   id: string;
   name: string;
   imageUrl: string;
   hand: HandCard[];
   animals: Animal[];
-  properties: Properties[];
+  properties: DoubleProperty[];
+  endPhase: boolean;
   action?: {
     actionType: CardTypes;
     player: string;
@@ -66,6 +95,7 @@ export interface EvolutionSessionEntity {
   name: string;
   cards: HandCard[];
   currentPlayer: string;
+  firstPlayer: string;
   host: string;
   eat: number;
   phase: Phase;
