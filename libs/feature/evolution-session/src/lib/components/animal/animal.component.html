@@ -1,0 +1,9 @@
+<div class='bg-lime-50 border-8 rounded-3xl overflow-hidden w-64 h-full'
+     [class.border-amber-300]='actioned'
+     [class.border-green-900]='!actioned'
+>
+  <div class='border-b-2 border-green-900 text-green-900 font-semibold uppercase text-center text-lg'>
+    {{ title }}
+  </div>
+  <ng-content></ng-content>
+</div>

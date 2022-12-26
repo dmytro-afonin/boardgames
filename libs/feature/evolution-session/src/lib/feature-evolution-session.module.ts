@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ContainerComponent } from './container/container.component';
+import { ContainerComponent } from './components/container/container.component';
 import { RouterModule, Routes } from '@angular/router';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +12,7 @@ import { UiCardModule } from '@boardgames/ui/card';
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { MatListModule } from '@angular/material/list';
 import { MatCardModule } from '@angular/material/card';
+import { AnimalComponent } from './components/animal/animal.component';
 
 const routes: Routes = [
   {
@@ -36,6 +37,6 @@ const routes: Routes = [
     MatListModule,
     MatCardModule
   ],
-  declarations: [ContainerComponent],
+  declarations: [ContainerComponent, AnimalComponent],
 })
 export class FeatureEvolutionSessionModule {}

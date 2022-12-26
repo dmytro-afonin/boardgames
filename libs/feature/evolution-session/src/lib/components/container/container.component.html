@@ -1,0 +1,127 @@
+<ng-container *ngIf='session && user'>
+  <button
+    mat-fab extended color="primary"
+    *ngIf='!session.started && session.host === user.id' (click)="startSession()"
+  >
+    <mat-icon>play_arrow</mat-icon>
+    Start Game
+  </button>
+
+  <ng-container *ngIf='session.started'>
+    <div class='flex'>
+      <div class='flex flex-grow'>
+        <div>
+          Phase: <span class='font-bold text-lg'>{{session.phase === 0 ? 'Growing' : 'Eating' }}</span>
+        </div>
+        <div *ngIf='session.phase === 1' class='ml-3'>
+          Food: <span class='font-bold text-lg'>{{session.eat}}</span>
+        </div>
+        <div class='ml-3'>
+          Cards left: <span class='font-bold text-lg'>{{session.cards.length}}</span>
+        </div>
+      </div>
+      <button mat-button (click)="accordion.openAll()">Expand All</button>
+      <button mat-button (click)="accordion.closeAll()">Collapse All</button>
+    </div>
+    <mat-accordion #accordion=matAccordion multi>
+      <mat-expansion-panel *ngFor='let player of players' [expanded]='true' class='bg-lime-50'>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ player.name }}
+          </mat-panel-title>
+
+          <mat-panel-description>
+            description
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class='list flex justify-center items-stretch p-3'>
+          <feature-animal
+            class='mr-3 last:mr-0'
+            *ngFor="let card of player.animals"
+            [actioned]='card.canAddProperty'
+            (click)='addPropertyToEnemyAnimal(card, player)'
+          >
+            <mat-list>
+              <mat-list-item *ngFor='let property of card.properties'>
+                {{propertyMap[property].title}}
+              </mat-list-item>
+            </mat-list>
+          </feature-animal>
+        </div>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel class='bg-lime-50' [expanded]='true'>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ myPlayer.name }}
+          </mat-panel-title>
+
+          <mat-panel-description>
+            <div class='flex w-full'>
+              <div class='flex-grow'>Use Drag & Drop to place new animals. Use click to add new properties</div>
+              <button class='bg-green-900 rounded-full text-white flex items-center p-1 pr-2'
+                      *ngIf='session.currentPlayer === myPlayer.id' (click)="endPhase()"
+              >
+                <mat-icon>next_plan</mat-icon>
+                <span class='pl-3'>End phase</span>
+              </button>
+            </div>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div
+          #myDeck="cdkDropList"
+          cdkDropList
+          class='list flex justify-center items-stretch p-3 border-2 border-green-900 border-dashed'
+          cdkDropListOrientation="horizontal"
+          [cdkDropListSortPredicate]='sortMyAnimals'
+          [cdkDropListData]="myPlayer.animals"
+          [cdkDropListDisabled]='true'
+          (cdkDropListDropped)="animalDropped($event)"
+        >
+          <div
+            *ngFor="let card of myPlayer.animals"
+            class='card mr-3 last:mr-0'
+            cdkDrag
+            [cdkDragData]='card'
+            (click)='addPropertyToAnimal(card)'
+          >
+            <feature-animal
+              [actioned]='card.canAddProperty'
+            >
+              <div *ngFor='let property of card.properties'>
+                {{propertyMap[property].title}}
+              </div>
+            </feature-animal>
+          </div>
+        </div>
+
+        <div
+          cdkDropList
+          [cdkDropListData]="myPlayer.hand"
+          class='list flex justify-center items-stretch p-3'
+          cdkDropListOrientation="horizontal"
+          [cdkDropListDisabled]='session.currentPlayer !== myPlayer.id'
+          (cdkDropListDropped)="handDrop($event)"
+          [cdkDropListConnectedTo]="[myDeck]"
+        >
+          <feature-animal
+            *ngFor="let card of myPlayer.hand;let i = index;"
+            class='card mr-3 last:mr-0'
+            (cdkDragStarted)='cancelSelectedProperty()'
+            cdkDrag
+            [cdkDragData]='card'
+            (click)='selectProperty(card, i)'
+            [title]='propertyMap[card.type1].title'
+          >
+            <button mat-button *ngIf='card.type2' (click)='switchCardType(card)'>
+              {{propertyMap[card.type2].title}}
+            </button>
+          </feature-animal>
+        </div>
+
+      </mat-expansion-panel>
+    </mat-accordion>
+  </ng-container>
+</ng-container>

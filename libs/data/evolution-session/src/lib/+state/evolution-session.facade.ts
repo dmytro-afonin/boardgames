@@ -42,6 +42,24 @@ export class EvolutionSessionFacade {
 
     this.#processAction(player, session);
   }
+
+  addPropertyToMyAnimal(player: Player, session: EvolutionSessionEntity): void {
+    if (!player.hand.length) {
+      player.endPhase = true;
+    }
+
+    this.#processAction(player, session);
+  }
+  addPropertyToEnemyAnimal(player: Player, session: EvolutionSessionEntity, enemy: Player): void {
+    if (!player.hand.length) {
+      player.endPhase = true;
+    }
+
+    const newSession: EvolutionSessionEntity = JSON.parse(JSON.stringify(session));
+    newSession.players[enemy.id] = enemy;
+
+    this.#processAction(player, newSession);
+  }
   endPhase(player: Player, session: EvolutionSessionEntity): void {
     player.endPhase = true;
 
@@ -104,11 +122,12 @@ export class EvolutionSessionFacade {
   }
 
   #processAction(player: Player, session: EvolutionSessionEntity): void {
-    session.players[player.id] = player;
+    const newSession: EvolutionSessionEntity = JSON.parse(JSON.stringify(session));
+    newSession.players[player.id] = player;
 
     const evolutionSession: Partial<EvolutionSessionEntity> = {
-      id: session.id,
-      ...this.#getSessionUpdateForAction(player, session)
+      id: newSession.id,
+      ...this.#getSessionUpdateForAction(player, newSession)
     }
 
     this.store.dispatch(EvolutionSessionActions.updateSession({evolutionSession}));
@@ -127,7 +146,7 @@ export class EvolutionSessionFacade {
 
     return {
       currentPlayer: this.#findNextPlayer(allPlayers, player),
-      players: {[player.id]: player}
+      players: session.players
     }
   }
 

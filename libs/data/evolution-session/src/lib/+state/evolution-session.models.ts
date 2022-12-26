@@ -69,6 +69,7 @@ export interface Animal {
   food: number;
   hibernation?: boolean;
   hibernationCooldown?: number;
+  canAddProperty?: boolean;
   properties: CardTypes[]
 }
 

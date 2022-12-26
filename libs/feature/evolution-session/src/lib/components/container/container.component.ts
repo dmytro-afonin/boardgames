@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import {
-  Animal, CardTypes,
+  Animal,
+  CardTypes,
   EvolutionSessionEntity,
   EvolutionSessionFacade,
   HandCard,
@@ -10,8 +11,7 @@ import { ActivatedRoute } from '@angular/router';
 import { filter, switchMap, tap } from 'rxjs';
 import { AuthFacade, User } from '@boardgames/data/auth';
 import { CdkDrag, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { MatSelectionListChange } from '@angular/material/list';
-import { UI_PROPERTY_MAP } from '../ui-player';
+import { UI_PROPERTY_MAP } from '../../ui-player';
 
 @Component({
   selector: 'feature-container',
@@ -26,7 +26,8 @@ export class ContainerComponent implements OnInit {
   user!: User;
   players!: Player[];
   myPlayer!: Player;
-  selectedProperty!: string;
+  selectedProperty!: HandCard | null;
+  selectedPropertyIndex!: number;
 
   constructor(
     private readonly sessionFacade: EvolutionSessionFacade,
@@ -42,9 +43,59 @@ export class ContainerComponent implements OnInit {
   handDrop(event: CdkDragDrop<HandCard[]>) {
     moveItemInArray(this.myPlayer.hand, event.previousIndex, event.currentIndex);
   }
-  selectProperty(e: MatSelectionListChange): void {
-    console.log(e);
-    this.selectedProperty = e.options[0].value;
+
+  addPropertyToAnimal(animal: Animal): void {
+    if (this.selectedProperty && animal.canAddProperty) {
+      animal.properties.unshift(this.selectedProperty.type1);
+      this.myPlayer.hand.splice(this.selectedPropertyIndex, 1);
+
+      this.cancelSelectedProperty();
+      this.sessionFacade.addPropertyToMyAnimal(this.myPlayer, this.session);
+    }
+  }
+
+  addPropertyToEnemyAnimal(animal: Animal, enemy: Player): void {
+    if (this.selectedProperty && animal.canAddProperty) {
+      animal.properties.unshift(this.selectedProperty.type1);
+      this.myPlayer.hand.splice(this.selectedPropertyIndex, 1);
+
+      this.cancelSelectedProperty();
+      this.sessionFacade.addPropertyToEnemyAnimal(this.myPlayer, this.session, enemy);
+    }
+  }
+
+  selectProperty(card: HandCard, index: number): void {
+    if (this.session.currentPlayer !== this.myPlayer.id) {
+      return;
+    }
+    console.log(card);
+    this.selectedProperty = card;
+    this.selectedPropertyIndex = index;
+    this.players.forEach(player => {
+      player.animals.forEach(animal => {
+        animal.canAddProperty = this.#canAddPropertyToEnemyAnimal(card, animal);
+      })
+    });
+    this.myPlayer.animals.forEach(animal => {
+      animal.canAddProperty = this.#canAddPropertyToMyAnimal(card, animal);
+    });
+  }
+  cancelSelectedProperty(): void {
+    this.selectedProperty = null;
+    this.selectedPropertyIndex = 0;
+    this.players.forEach(player => {
+      player.animals.forEach(animal => {
+        delete animal.canAddProperty;
+      })
+    });
+    this.myPlayer.animals.forEach(animal => {
+      delete animal.canAddProperty;
+    });
+  }
+  switchCardType(card: HandCard): void {
+    const type2 = card.type2 as CardTypes;
+    card.type2 = card.type1;
+    card.type1 = type2;
   }
   animalDropped(event: CdkDragDrop<Animal[]>) {
     console.log({event});
@@ -89,5 +140,21 @@ export class ContainerComponent implements OnInit {
         this.players = Object.values(players);
       })
     ).subscribe();
+  }
+
+  #canAddPropertyToEnemyAnimal(card: HandCard, animal: Animal): boolean {
+    return card.type1 === CardTypes.PARASITE && animal.properties.every(p => p !== CardTypes.PARASITE);
+  }
+
+  #canAddPropertyToMyAnimal(card: HandCard, animal: Animal): boolean {
+    if (card.type1 === CardTypes.FAT_TISSUE) {
+      return true;
+    }
+
+    if (card.type1 === CardTypes.PARASITE) {
+      return false;
+    }
+
+    return animal.properties.every(p => p !== card.type1);
   }
 }
