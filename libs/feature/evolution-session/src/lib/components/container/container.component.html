@@ -35,7 +35,7 @@
           </mat-panel-description>
         </mat-expansion-panel-header>
 
-        <div class='list flex justify-center items-stretch p-3'>
+        <div class='list flex items-stretch p-3'>
           <feature-animal
             class='mr-3 last:mr-0'
             *ngFor="let card of player.animals"
@@ -73,7 +73,7 @@
         <div
           #myDeck="cdkDropList"
           cdkDropList
-          class='list flex justify-center items-stretch p-3 border-2 border-green-900 border-dashed'
+          class='list flex items-stretch border-2 border-green-900 border-dashed'
           cdkDropListOrientation="horizontal"
           [cdkDropListSortPredicate]='sortMyAnimals'
           [cdkDropListData]="myPlayer.animals"
@@ -82,7 +82,7 @@
         >
           <div
             *ngFor="let card of myPlayer.animals"
-            class='card mr-3 last:mr-0'
+            class='card last:mr-0'
             cdkDrag
             [cdkDragData]='card'
             (click)='addPropertyToAnimal(card)'
@@ -100,8 +100,9 @@
         <div
           cdkDropList
           [cdkDropListData]="myPlayer.hand"
-          class='list flex justify-center items-stretch p-3'
+          class='list flex items-stretch p-3'
           cdkDropListOrientation="horizontal"
+          [cdkDropListAutoScrollStep]='6'
           [cdkDropListDisabled]='session.currentPlayer !== myPlayer.id'
           (cdkDropListDropped)="handDrop($event)"
           [cdkDropListConnectedTo]="[myDeck]"
