@@ -68,7 +68,6 @@ export class ContainerComponent implements OnInit {
     if (this.session.currentPlayer !== this.myPlayer.id) {
       return;
     }
-    console.log(card);
     this.selectedProperty = card;
     this.selectedPropertyIndex = index;
     this.players.forEach(player => {
@@ -98,7 +97,6 @@ export class ContainerComponent implements OnInit {
     card.type1 = type2;
   }
   animalDropped(event: CdkDragDrop<Animal[]>) {
-    console.log({event});
     if (event.previousContainer !== event.container) {
       const animal: Animal = {index: event.currentIndex, food: 0, properties: []};
       this.myPlayer.animals.splice(event.currentIndex, 0, animal);
@@ -129,7 +127,6 @@ export class ContainerComponent implements OnInit {
       switchMap(() => this.sessionFacade.selectCurrentSession$),
       filter((s): s is EvolutionSessionEntity => !!s),
       tap((s) => {
-        console.log({s});
         this.session = s;
         const players = JSON.parse(JSON.stringify(this.session.players));
         if (!this.session.started && !players[this.user.id]) {
@@ -152,6 +149,14 @@ export class ContainerComponent implements OnInit {
     }
 
     if (card.type1 === CardTypes.PARASITE) {
+      return false;
+    }
+
+    if (card.type1 === CardTypes.CARNIVOROUS && animal.properties.find(p => p === CardTypes.SCAVENGER)) {
+      return false;
+    }
+
+    if (card.type1 === CardTypes.SCAVENGER && animal.properties.find(p => p === CardTypes.CARNIVOROUS)) {
       return false;
     }
 

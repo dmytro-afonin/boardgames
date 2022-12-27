@@ -122,6 +122,8 @@ export class EvolutionSessionFacade {
   }
 
   #processAction(player: Player, session: EvolutionSessionEntity): void {
+    console.log(1, JSON.parse(JSON.stringify(session)));
+
     const newSession: EvolutionSessionEntity = JSON.parse(JSON.stringify(session));
     newSession.players[player.id] = player;
 
@@ -130,6 +132,7 @@ export class EvolutionSessionFacade {
       ...this.#getSessionUpdateForAction(player, newSession)
     }
 
+    console.log(2, JSON.parse(JSON.stringify(evolutionSession)));
     this.store.dispatch(EvolutionSessionActions.updateSession({evolutionSession}));
   }
 

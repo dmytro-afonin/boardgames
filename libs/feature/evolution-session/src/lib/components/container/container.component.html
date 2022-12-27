@@ -39,6 +39,7 @@
         <div class='list flex items-stretch p-3'>
           <feature-animal
             class='mr-3 last:mr-0'
+            [class.cursor-pointer]='card.canAddProperty'
             *ngFor="let card of player.animals"
             [actioned]='card.canAddProperty'
             (click)='addPropertyToEnemyAnimal(card, player)'
@@ -92,6 +93,8 @@
           (cdkDropListDropped)="animalDropped($event)"
         >
           <feature-animal
+            [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
+            [class.brightness-90]='session.currentPlayer !== myPlayer.id'
             *ngFor="let card of myPlayer.animals"
             class='card last:mr-0'
             cdkDrag
