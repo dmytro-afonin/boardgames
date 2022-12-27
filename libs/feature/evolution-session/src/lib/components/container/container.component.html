@@ -32,7 +32,8 @@
           </mat-panel-title>
 
           <mat-panel-description>
-            <span class='bg-green-900 rounded-full text-lime-50 py-1 px-3' *ngIf='player.id === session.currentPlayer'>Current Player</span>
+            <span class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3' *ngIf='player.id === session.currentPlayer'>Current Player</span>
+            <span class='bg-green-900 rounded-full text-lime-50 py-1 px-3' *ngIf='player.endPhase'>Finished</span>
           </mat-panel-description>
         </mat-expansion-panel-header>
 
@@ -96,7 +97,7 @@
             [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
             [class.brightness-90]='session.currentPlayer !== myPlayer.id'
             *ngFor="let card of myPlayer.animals"
-            class='card last:mr-0'
+            class='card mr-3 last:mr-0'
             cdkDrag
             [cdkDragData]='card'
             (click)='addPropertyToAnimal(card)'
@@ -134,7 +135,7 @@
           >
             <div class='flex flex-col justify-end text-lg h-16'>
               <feature-property
-                class='cursor-pointer hover:brightness-110'
+                class='cursor-pointer rotate-180 hover:brightness-110'
                 *ngIf='card.type2'
                 (click)='switchCardType(card)'
                 [type]='card.type2'

@@ -154,8 +154,12 @@ export class EvolutionSessionFacade {
   }
 
   #setupNewPhase(player: Player, session: EvolutionSessionEntity): Partial<EvolutionSessionEntity> {
+    const allPlayers = Object.values(session.players);
+    allPlayers.forEach(p => {
+      session.players[p.id].endPhase = false;
+    });
+
     if (session.phase === Phase.GROWING) {
-      const allPlayers = Object.values(session.players);
       return {
         players: {[player.id]: player},
         phase: Phase.ACTING,
