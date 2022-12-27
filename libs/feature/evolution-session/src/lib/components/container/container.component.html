@@ -27,11 +27,12 @@
       <mat-expansion-panel *ngFor='let player of players' [expanded]='true' class='bg-lime-50'>
         <mat-expansion-panel-header>
           <mat-panel-title>
+            <img class='rounded-full w-9 mr-3' *ngIf='player.imageUrl' [src]='player.imageUrl' alt='{{player.name}}' />
             {{ player.name }}
           </mat-panel-title>
 
           <mat-panel-description>
-            description
+            <span class='bg-green-900 rounded-full text-lime-50 py-1 px-3' *ngIf='player.id === session.currentPlayer'>Current Player</span>
           </mat-panel-description>
         </mat-expansion-panel-header>
 
@@ -42,11 +43,11 @@
             [actioned]='card.canAddProperty'
             (click)='addPropertyToEnemyAnimal(card, player)'
           >
-            <mat-list>
-              <mat-list-item *ngFor='let property of card.properties'>
-                {{propertyMap[property].title}}
-              </mat-list-item>
-            </mat-list>
+            <feature-property
+              *ngFor='let property of card.properties'
+              [type]='property'
+            >
+            </feature-property>
           </feature-animal>
         </div>
       </mat-expansion-panel>
@@ -54,6 +55,7 @@
       <mat-expansion-panel class='bg-lime-50' [expanded]='true'>
         <mat-expansion-panel-header>
           <mat-panel-title>
+            <img class='rounded-full w-9 mr-3' *ngIf='myPlayer.imageUrl' [src]='myPlayer.imageUrl' alt='{{myPlayer.name}}' />
             {{ myPlayer.name }}
           </mat-panel-title>
 
@@ -73,28 +75,27 @@
         <div
           #myDeck="cdkDropList"
           cdkDropList
-          class='list flex items-stretch border-2 border-green-900 border-dashed'
+          class='list flex items-stretch border-2 border-green-900 rounded-3xl border-dashed p-3'
           cdkDropListOrientation="horizontal"
           [cdkDropListSortPredicate]='sortMyAnimals'
           [cdkDropListData]="myPlayer.animals"
           [cdkDropListDisabled]='true'
           (cdkDropListDropped)="animalDropped($event)"
         >
-          <div
+          <feature-animal
             *ngFor="let card of myPlayer.animals"
             class='card last:mr-0'
             cdkDrag
             [cdkDragData]='card'
             (click)='addPropertyToAnimal(card)'
+            [actioned]='card.canAddProperty'
           >
-            <feature-animal
-              [actioned]='card.canAddProperty'
+            <feature-property
+              *ngFor='let property of card.properties'
+              [type]='property'
             >
-              <div *ngFor='let property of card.properties'>
-                {{propertyMap[property].title}}
-              </div>
-            </feature-animal>
-          </div>
+            </feature-property>
+          </feature-animal>
         </div>
 
         <div
@@ -114,11 +115,17 @@
             cdkDrag
             [cdkDragData]='card'
             (click)='selectProperty(card, i)'
-            [title]='propertyMap[card.type1].title'
+            [actioned]='selectedPropertyIndex === i'
+            [type]='card.type1'
           >
-            <button mat-button *ngIf='card.type2' (click)='switchCardType(card)'>
-              {{propertyMap[card.type2].title}}
-            </button>
+            <div class='flex flex-col justify-end text-lg h-16'>
+              <feature-property
+                *ngIf='card.type2'
+                (click)='switchCardType(card)'
+                [type]='card.type2'
+              >
+              </feature-property>
+            </div>
           </feature-animal>
         </div>
 

@@ -9,10 +9,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { CdkOption } from '@angular/cdk/listbox';
 import { UiCardModule } from '@boardgames/ui/card';
-import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragHandle, CdkDropList } from '@angular/cdk/drag-drop';
 import { MatListModule } from '@angular/material/list';
 import { MatCardModule } from '@angular/material/card';
 import { AnimalComponent } from './components/animal/animal.component';
+import { MatChipsModule } from '@angular/material/chips';
+import { PropertyComponent } from './components/property/property.component';
 
 const routes: Routes = [
   {
@@ -35,8 +37,10 @@ const routes: Routes = [
     CdkDropList,
     CdkDrag,
     MatListModule,
-    MatCardModule
+    MatCardModule,
+    MatChipsModule,
+    CdkDragHandle
   ],
-  declarations: [ContainerComponent, AnimalComponent],
+  declarations: [ContainerComponent, AnimalComponent, PropertyComponent],
 })
 export class FeatureEvolutionSessionModule {}

@@ -27,7 +27,7 @@ export class ContainerComponent implements OnInit {
   players!: Player[];
   myPlayer!: Player;
   selectedProperty!: HandCard | null;
-  selectedPropertyIndex!: number;
+  selectedPropertyIndex!: number | null;
 
   constructor(
     private readonly sessionFacade: EvolutionSessionFacade,
@@ -47,7 +47,7 @@ export class ContainerComponent implements OnInit {
   addPropertyToAnimal(animal: Animal): void {
     if (this.selectedProperty && animal.canAddProperty) {
       animal.properties.unshift(this.selectedProperty.type1);
-      this.myPlayer.hand.splice(this.selectedPropertyIndex, 1);
+      this.myPlayer.hand.splice(this.selectedPropertyIndex as number, 1);
 
       this.cancelSelectedProperty();
       this.sessionFacade.addPropertyToMyAnimal(this.myPlayer, this.session);
@@ -57,7 +57,7 @@ export class ContainerComponent implements OnInit {
   addPropertyToEnemyAnimal(animal: Animal, enemy: Player): void {
     if (this.selectedProperty && animal.canAddProperty) {
       animal.properties.unshift(this.selectedProperty.type1);
-      this.myPlayer.hand.splice(this.selectedPropertyIndex, 1);
+      this.myPlayer.hand.splice(this.selectedPropertyIndex as number, 1);
 
       this.cancelSelectedProperty();
       this.sessionFacade.addPropertyToEnemyAnimal(this.myPlayer, this.session, enemy);
@@ -82,7 +82,7 @@ export class ContainerComponent implements OnInit {
   }
   cancelSelectedProperty(): void {
     this.selectedProperty = null;
-    this.selectedPropertyIndex = 0;
+    this.selectedPropertyIndex = null;
     this.players.forEach(player => {
       player.animals.forEach(animal => {
         delete animal.canAddProperty;

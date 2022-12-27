@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, ViewEncapsulation } from '@angular/core';
+import { CardTypes } from '@boardgames/data/evolution-session';
+import { UI_PROPERTY_MAP } from '../../ui-player';
 
 @Component({
   selector: 'feature-animal',
@@ -8,6 +10,7 @@ import { ChangeDetectionStrategy, Component, Input, ViewEncapsulation } from '@a
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AnimalComponent {
-  @Input() title = 'animal';
+  @Input() type: CardTypes = CardTypes.ANIMAL;
   @Input() actioned: boolean | undefined = false;
+  propertyUIMap = UI_PROPERTY_MAP;
 }

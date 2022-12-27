@@ -8,6 +8,7 @@ export enum Phase {
 }
 
 export enum CardTypes {
+  ANIMAL,
   MIMICRY,
   SWIMMING,
   RUNNING,
@@ -31,6 +32,7 @@ export enum CardTypes {
 
 
 export const WEIGHT_PROPERTY_MAP: Record<CardTypes, number> = {
+  [CardTypes.ANIMAL]: 0,
   [CardTypes.MIMICRY]: 0,
   [CardTypes.SWIMMING]: 0,
   [CardTypes.RUNNING]: 0,
