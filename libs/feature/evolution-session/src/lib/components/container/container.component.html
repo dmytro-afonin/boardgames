@@ -61,7 +61,15 @@
 
           <mat-panel-description>
             <div class='flex w-full'>
-              <div class='flex-grow'>Use Drag & Drop to place new animals. Use click to add new properties</div>
+              <div class='flex-grow'>
+                <span *ngIf='session.currentPlayer === myPlayer.id'>
+                  Use Drag & Drop to place new animals. Use click to add new properties
+                </span>
+
+                <span *ngIf='session.currentPlayer !== myPlayer.id'>
+                  Wait until your turn
+                </span>
+              </div>
               <button class='bg-green-900 rounded-full text-white flex items-center p-1 pr-2'
                       *ngIf='session.currentPlayer === myPlayer.id' (click)="endPhase()"
               >
@@ -75,7 +83,8 @@
         <div
           #myDeck="cdkDropList"
           cdkDropList
-          class='list flex items-stretch border-2 border-green-900 rounded-3xl border-dashed p-3'
+          class='list flex items-stretch border-dashed border-green-900 rounded-3xl p-3'
+          [class.border-2]='session.currentPlayer === myPlayer.id'
           cdkDropListOrientation="horizontal"
           [cdkDropListSortPredicate]='sortMyAnimals'
           [cdkDropListData]="myPlayer.animals"
@@ -110,7 +119,9 @@
         >
           <feature-animal
             *ngFor="let card of myPlayer.hand;let i = index;"
-            class='card mr-3 last:mr-0'
+            [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
+            [class.brightness-90]='session.currentPlayer !== myPlayer.id'
+            class='card mr-3 last:mr-0 scale-100 hover:scale-110'
             (cdkDragStarted)='cancelSelectedProperty()'
             cdkDrag
             [cdkDragData]='card'
@@ -120,6 +131,7 @@
           >
             <div class='flex flex-col justify-end text-lg h-16'>
               <feature-property
+                class='cursor-pointer hover:brightness-110'
                 *ngIf='card.type2'
                 (click)='switchCardType(card)'
                 [type]='card.type2'
