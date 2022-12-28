@@ -69,9 +69,11 @@ export interface DoubleProperty {
 export interface Animal {
   index: number;
   food: number;
+  requiredFood: number;
+  fat: number;
   hibernation?: boolean;
   hibernationCooldown?: number;
-  canAddProperty?: boolean;
+  canBeActioned?: boolean;
   properties: CardTypes[]
 }
 

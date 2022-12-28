@@ -2,16 +2,18 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import {
   Animal,
   CardTypes,
+  DoubleProperty,
   EvolutionSessionEntity,
   EvolutionSessionFacade,
   HandCard,
-  Player
+  Phase,
+  Player,
+  WEIGHT_PROPERTY_MAP
 } from '@boardgames/data/evolution-session';
 import { ActivatedRoute } from '@angular/router';
 import { filter, switchMap, tap } from 'rxjs';
 import { AuthFacade, User } from '@boardgames/data/auth';
-import { CdkDrag, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { UI_PROPERTY_MAP } from '../../ui-player';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'feature-container',
@@ -20,14 +22,13 @@ import { UI_PROPERTY_MAP } from '../../ui-player';
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class ContainerComponent implements OnInit {
-  propertyMap = UI_PROPERTY_MAP;
-  cardTypes = CardTypes;
   session!: EvolutionSessionEntity;
   user!: User;
   players!: Player[];
   myPlayer!: Player;
-  selectedProperty!: HandCard | null;
+  selectedProperty!: CardTypes | null;
   selectedPropertyIndex!: number | null;
+  foodSelected!: boolean;
 
   constructor(
     private readonly sessionFacade: EvolutionSessionFacade,
@@ -44,9 +45,68 @@ export class ContainerComponent implements OnInit {
     moveItemInArray(this.myPlayer.hand, event.previousIndex, event.currentIndex);
   }
 
-  addPropertyToAnimal(animal: Animal): void {
-    if (this.selectedProperty && animal.canAddProperty) {
-      animal.properties.unshift(this.selectedProperty.type1);
+  actionAnimal(animal: Animal): void {
+    if (animal.canBeActioned) {
+      if (this.session.phase === Phase.GROWING) {
+        this.actionGrowingPhase(animal);
+      } else {
+        this.actionFoodPhase(animal);
+      }
+    }
+  }
+
+  actionFoodPhase(animal: Animal): void {
+    if (this.foodSelected) {
+      animal.food++;
+      this.session.eat--;
+
+      const props = [...this.myPlayer.properties];
+
+      const directions = [{from: 'animal1', to: 'animal2'},{from: 'animal2', to: 'animal1'}];
+
+      directions.forEach(d => {
+        let prop = props.find(p => p[d.from as keyof DoubleProperty] === animal.index && p.property !== CardTypes.SYMBIOSYS);
+        while (prop) {
+          const animal = this.myPlayer.animals[prop[d.to as keyof DoubleProperty]];
+          if (!this.feedAnimal(animal, prop.property)) {
+            break;
+          }
+          prop = props.find(p => p[d.from as keyof DoubleProperty] === animal.index);
+        }
+      });
+      this.foodSelected = false;
+      this.resetAnimalsActions();
+    }
+  }
+
+  feedAnimal(animal: Animal, prop: CardTypes): boolean {
+    const isCooperation = prop === CardTypes.COOPERATION;
+    if (isCooperation && !this.session.eat) {
+      return false;
+    }
+
+    if (this.canEat(animal)) {
+      animal.food++;
+      if (isCooperation) {
+        this.session.eat--;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  actionGrowingPhase(animal: Animal): void {
+    if (this.selectedProperty) {
+      if ([CardTypes.COMMUNICATION, CardTypes.COOPERATION, CardTypes.SYMBIOSYS].includes(this.selectedProperty)) {
+        this.myPlayer.properties.push({
+          animal1: animal.index,
+          animal2: animal.index + 1,
+          property: this.selectedProperty
+        })
+      } else {
+        animal.requiredFood += WEIGHT_PROPERTY_MAP[this.selectedProperty];
+        animal.properties.unshift(this.selectedProperty);
+      }
       this.myPlayer.hand.splice(this.selectedPropertyIndex as number, 1);
 
       this.cancelSelectedProperty();
@@ -55,8 +115,9 @@ export class ContainerComponent implements OnInit {
   }
 
   addPropertyToEnemyAnimal(animal: Animal, enemy: Player): void {
-    if (this.selectedProperty && animal.canAddProperty) {
-      animal.properties.unshift(this.selectedProperty.type1);
+    if (this.selectedProperty && animal.canBeActioned) {
+      animal.requiredFood += WEIGHT_PROPERTY_MAP[this.selectedProperty];
+      animal.properties.unshift(this.selectedProperty);
       this.myPlayer.hand.splice(this.selectedPropertyIndex as number, 1);
 
       this.cancelSelectedProperty();
@@ -64,33 +125,60 @@ export class ContainerComponent implements OnInit {
     }
   }
 
+  selectFood(): void {
+    this.foodSelected = !this.foodSelected;
+    this.myPlayer.animals.forEach(a => {
+      if (this.canEat(a)) {
+        a.canBeActioned = this.foodSelected;
+      }
+    })
+  }
+
+  canEat(a: Animal): boolean {
+    const symbiosys = this.myPlayer.properties.find(p => p.property === CardTypes.SYMBIOSYS && p.animal2 === a.index);
+    if (symbiosys) {
+      const parent = this.myPlayer.animals[symbiosys.animal1];
+      const isParentFed = parent.food >= parent.requiredFood;
+      if (!isParentFed) {
+        return false;
+      }
+    }
+    const possibleFat = a.properties.filter(p => p === CardTypes.FAT_TISSUE).length;
+    return a.food < a.requiredFood || a.fat < possibleFat;
+  }
+
   selectProperty(card: HandCard, index: number): void {
     if (this.session.currentPlayer !== this.myPlayer.id) {
       return;
     }
-    this.selectedProperty = card;
+    this.selectedProperty = card.type1;
     this.selectedPropertyIndex = index;
     this.players.forEach(player => {
       player.animals.forEach(animal => {
-        animal.canAddProperty = this.#canAddPropertyToEnemyAnimal(card, animal);
+        animal.canBeActioned = this.#canAddPropertyToEnemyAnimal(card, animal);
       })
     });
     this.myPlayer.animals.forEach(animal => {
-      animal.canAddProperty = this.#canAddPropertyToMyAnimal(card, animal);
+      animal.canBeActioned = this.#canAddPropertyToMyAnimal(card, animal);
     });
   }
   cancelSelectedProperty(): void {
     this.selectedProperty = null;
     this.selectedPropertyIndex = null;
+    this.resetAnimalsActions();
+  }
+
+  resetAnimalsActions(): void {
     this.players.forEach(player => {
       player.animals.forEach(animal => {
-        delete animal.canAddProperty;
+        delete animal.canBeActioned;
       })
     });
     this.myPlayer.animals.forEach(animal => {
-      delete animal.canAddProperty;
+      delete animal.canBeActioned;
     });
   }
+
   switchCardType(card: HandCard): void {
     const type2 = card.type2 as CardTypes;
     card.type2 = card.type1;
@@ -98,7 +186,18 @@ export class ContainerComponent implements OnInit {
   }
   animalDropped(event: CdkDragDrop<Animal[]>) {
     if (event.previousContainer !== event.container) {
-      const animal: Animal = {index: event.currentIndex, food: 0, properties: []};
+      const animal: Animal = {index: event.currentIndex, food: 0, properties: [], requiredFood: 1, fat: 0};
+      this.myPlayer.properties.forEach(p => {
+        if (p.animal1 >= event.currentIndex) {
+          p.animal1++;
+          p.animal2++;
+        }
+      });
+      this.myPlayer.animals.forEach(a => {
+        if (a.index >= event.currentIndex) {
+          a.index++;
+        }
+      });
       this.myPlayer.animals.splice(event.currentIndex, 0, animal);
       this.myPlayer.hand.splice(event.previousIndex, 1);
       this.sessionFacade.playAnimal(this.myPlayer, this.session);
@@ -109,8 +208,8 @@ export class ContainerComponent implements OnInit {
     this.sessionFacade.endPhase(this.myPlayer, this.session);
   }
 
-  sortMyAnimals(index: number, item: CdkDrag<Animal>): boolean {
-    return true;
+  sortMyAnimals = (index: number): boolean => {
+    return !this.myPlayer.properties.some(p => p.animal2 === index);
   }
 
   ngOnInit(): void {
@@ -127,7 +226,7 @@ export class ContainerComponent implements OnInit {
       switchMap(() => this.sessionFacade.selectCurrentSession$),
       filter((s): s is EvolutionSessionEntity => !!s),
       tap((s) => {
-        this.session = s;
+        this.session = JSON.parse(JSON.stringify(s));
         const players = JSON.parse(JSON.stringify(this.session.players));
         if (!this.session.started && !players[this.user.id]) {
           this.sessionFacade.joinSession(this.user, this.session.id as string);
@@ -160,6 +259,13 @@ export class ContainerComponent implements OnInit {
       return false;
     }
 
-    return animal.properties.every(p => p !== card.type1);
+    const hasSameProperty = animal.properties.find(p => p === card.type1);
+
+    if ([CardTypes.COOPERATION, CardTypes.COMMUNICATION, CardTypes.SYMBIOSYS].includes(card.type1)) {
+      const hasCardToCooperate = this.myPlayer.animals[animal.index + 1];
+      return hasCardToCooperate && !hasSameProperty;
+    }
+
+    return !hasSameProperty;
   }
 }

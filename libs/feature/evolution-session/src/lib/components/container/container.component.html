@@ -9,17 +9,27 @@
 
   <ng-container *ngIf='session.started'>
     <div class='flex'>
-      <div class='flex flex-grow'>
-        <div>
-          Phase: <span class='font-bold text-lg'>{{session.phase === 0 ? 'Growing' : 'Eating' }}</span>
-        </div>
-        <div *ngIf='session.phase === 1' class='ml-3'>
-          Food: <span class='font-bold text-lg'>{{session.eat}}</span>
-        </div>
-        <div class='ml-3'>
-          Cards left: <span class='font-bold text-lg'>{{session.cards.length}}</span>
-        </div>
+      <div>
+        Phase: <span class='font-bold text-lg'>{{session.phase === 0 ? 'Growing' : 'Eating' }}</span>
       </div>
+
+      <div class='ml-3'>
+        Cards left: <span class='font-bold text-lg'>{{session.cards.length}}</span>
+      </div>
+
+      <div class='flex-grow flex justify-center'>
+        <button
+          class='text-white rounded-full flex items-center px-3 transition-all  hover:scale-105'
+          [class.hover:bg-green-800]='!foodSelected'
+          [class.bg-green-900]='!foodSelected'
+          [class.bg-amber-300]='foodSelected'
+          [class.hover:bg-amber-400]='foodSelected'
+          (click)='selectFood()'
+          *ngIf='session.phase === 1'>
+          <mat-icon>eco</mat-icon> X {{session.eat}}
+        </button>
+      </div>
+
       <button mat-button (click)="accordion.openAll()">Expand All</button>
       <button mat-button (click)="accordion.closeAll()">Collapse All</button>
     </div>
@@ -32,7 +42,12 @@
           </mat-panel-title>
 
           <mat-panel-description>
-            <span class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3' *ngIf='player.id === session.currentPlayer'>Current Player</span>
+            <span
+              class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
+              *ngIf='player.id === session.currentPlayer'
+            >
+              Current Turn
+            </span>
             <span class='bg-green-900 rounded-full text-lime-50 py-1 px-3' *ngIf='player.endPhase'>Finished</span>
           </mat-panel-description>
         </mat-expansion-panel-header>
@@ -40,11 +55,27 @@
         <div class='list flex items-stretch p-3'>
           <feature-animal
             class='mr-3 last:mr-0'
-            [class.cursor-pointer]='card.canAddProperty'
+            [class.cursor-pointer]='card.canBeActioned'
             *ngFor="let card of player.animals"
-            [actioned]='card.canAddProperty'
+            [actioned]='card.canBeActioned'
             (click)='addPropertyToEnemyAnimal(card, player)'
           >
+            <div class='head uppercase text-center'>
+              <span *ngIf='session.phase === 1'>
+                {{card.food}}/{{card.requiredFood}}
+              </span>
+              Animal
+            </div>
+            <ng-container *ngFor='let property of player.properties'>
+              <div *ngIf='property.animal1 === card.index' class='relative h-7'>
+                <feature-property
+                  class='absolute w-full left-28'
+                  [type]='property.property'
+                >
+                </feature-property>
+              </div>
+            </ng-container>
+
             <feature-property
               *ngFor='let property of card.properties'
               [type]='property'
@@ -95,14 +126,29 @@
         >
           <feature-animal
             [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
-            [class.brightness-90]='session.currentPlayer !== myPlayer.id'
             *ngFor="let card of myPlayer.animals"
             class='card mr-3 last:mr-0'
             cdkDrag
             [cdkDragData]='card'
-            (click)='addPropertyToAnimal(card)'
-            [actioned]='card.canAddProperty'
+            (click)='actionAnimal(card)'
+            [actioned]='card.canBeActioned'
           >
+            <div class='head uppercase text-center'>
+              <span *ngIf='session.phase === 1'>
+                {{card.food}}/{{card.requiredFood}}
+              </span>
+              Animal
+            </div>
+            <ng-container *ngFor='let property of myPlayer.properties'>
+              <div *ngIf='property.animal1 === card.index' class='relative h-7'>
+                <feature-property
+                  class='absolute w-full left-28'
+                  [type]='property.property'
+                >
+                </feature-property>
+              </div>
+            </ng-container>
+
             <feature-property
               *ngFor='let property of card.properties'
               [type]='property'
@@ -117,14 +163,13 @@
           class='list flex items-stretch p-3'
           cdkDropListOrientation="horizontal"
           [cdkDropListAutoScrollStep]='6'
-          [cdkDropListDisabled]='session.currentPlayer !== myPlayer.id'
+          [cdkDropListDisabled]='session.currentPlayer !== myPlayer.id || session.phase === 1'
           (cdkDropListDropped)="handDrop($event)"
           [cdkDropListConnectedTo]="[myDeck]"
         >
           <feature-animal
             *ngFor="let card of myPlayer.hand;let i = index;"
-            [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
-            [class.brightness-90]='session.currentPlayer !== myPlayer.id'
+            [class.pointer-events-none]='session.currentPlayer !== myPlayer.id || session.phase === 1'
             class='card mr-3 last:mr-0 scale-100 hover:scale-110'
             (cdkDragStarted)='cancelSelectedProperty()'
             cdkDrag
@@ -133,6 +178,7 @@
             [actioned]='selectedPropertyIndex === i'
             [type]='card.type1'
           >
+            <feature-property class='head' [type]='card.type1'></feature-property>
             <div class='flex flex-col justify-end text-lg h-16'>
               <feature-property
                 class='cursor-pointer rotate-180 hover:brightness-110'

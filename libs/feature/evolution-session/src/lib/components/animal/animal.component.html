@@ -1,10 +1,11 @@
-<div class='bg-lime-50 border-8 rounded-3xl overflow-hidden w-56 h-full {{propertyUIMap[type].class}}'
+<div class='bg-lime-50 border-8 rounded-3xl w-56 h-full {{propertyUIMap[type].class}}'
      [class.border-amber-300]='actioned'
      [class.border-green-900]='!actioned'
 >
-  <div class='border-b-2 border-green-900 text-lg' cdkDragHandle>
-    <feature-property [type]='type'>
-    </feature-property>
+  <div class='border-b-2 rounded-t-3xl overflow-hidden border-green-900 text-lg'>
+    <ng-content select='.head'></ng-content>
   </div>
-  <ng-content></ng-content>
+  <div class='rounded-3xl'>
+    <ng-content></ng-content>
+  </div>
 </div>

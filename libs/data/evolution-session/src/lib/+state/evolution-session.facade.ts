@@ -68,13 +68,14 @@ export class EvolutionSessionFacade {
   startSession(evolutionSession: EvolutionSessionEntity): void {
     const session: EvolutionSessionEntity = JSON.parse(JSON.stringify(evolutionSession));
     const playerIds: string[] = Object.keys(session.players);
-    for (let i = 0; i < 6; i ++) {
+    for (let i = 0; i < 40; i ++) {
       for (let j = 0; j < playerIds.length; j++) {
         const player = session.players[playerIds[j]];
         player.order = j;
         session.cards = this.#addCard(player, session.cards);
       }
     }
+    debugger;
     session.started = true;
     const randomPlayerIndex = this.#getRandomIndex(playerIds.length);
     session.firstPlayer = playerIds[randomPlayerIndex];
@@ -122,8 +123,6 @@ export class EvolutionSessionFacade {
   }
 
   #processAction(player: Player, session: EvolutionSessionEntity): void {
-    console.log(1, JSON.parse(JSON.stringify(session)));
-
     const newSession: EvolutionSessionEntity = JSON.parse(JSON.stringify(session));
     newSession.players[player.id] = player;
 
@@ -132,7 +131,6 @@ export class EvolutionSessionFacade {
       ...this.#getSessionUpdateForAction(player, newSession)
     }
 
-    console.log(2, JSON.parse(JSON.stringify(evolutionSession)));
     this.store.dispatch(EvolutionSessionActions.updateSession({evolutionSession}));
   }
 
@@ -144,7 +142,7 @@ export class EvolutionSessionFacade {
       if (!session.cards.length) {
         // todo calculate winner
       }
-      return this.#setupNewPhase(player, session);
+      return this.#setupNewPhase(session);
     }
 
     return {
@@ -153,7 +151,7 @@ export class EvolutionSessionFacade {
     }
   }
 
-  #setupNewPhase(player: Player, session: EvolutionSessionEntity): Partial<EvolutionSessionEntity> {
+  #setupNewPhase(session: EvolutionSessionEntity): Partial<EvolutionSessionEntity> {
     const allPlayers = Object.values(session.players);
     allPlayers.forEach(p => {
       session.players[p.id].endPhase = false;
@@ -161,7 +159,7 @@ export class EvolutionSessionFacade {
 
     if (session.phase === Phase.GROWING) {
       return {
-        players: {[player.id]: player},
+        players: session.players,
         phase: Phase.ACTING,
         eat: this.#getFood(allPlayers.length),
         currentPlayer: session.firstPlayer
@@ -246,8 +244,7 @@ export class EvolutionSessionFacade {
         if (a.hibernation) {
           return true;
         }
-        const requiredFood = this.#getRequiredFood(a.properties);
-        return a.food >= requiredFood;
+        return a.food >= a.requiredFood;
       })
       .map(a => {
         const hibernationCooldown = this.#getHibernationCooldown(a);
@@ -265,10 +262,6 @@ export class EvolutionSessionFacade {
     }
 
     return 0;
-  }
-
-  #getRequiredFood(properties: CardTypes[]): number {
-    return properties.reduce((sum, cur) => sum + WEIGHT_PROPERTY_MAP[cur], 1);
   }
 
   #shiftFirstPlayer(session: EvolutionSessionEntity): string {
