@@ -1,13 +1,30 @@
-<ng-container *ngIf='session && user'>
-  <button
-    mat-fab extended color="primary"
-    *ngIf='!session.started && session.host === user.id' (click)="startSession()"
-  >
-    <mat-icon>play_arrow</mat-icon>
-    Start Game
-  </button>
+<ng-container *ngIf='session'>
 
-  <ng-container *ngIf='session.started'>
+  <div [formGroup]='joinGameForm' *ngIf='!session.started'>
+    <mat-form-field *ngIf='!myPlayer || session.host === user?.id'>
+      <mat-label>Your Nickname</mat-label>
+      <input matInput placeholder="Player name" formControlName='name'>
+    </mat-form-field>
+
+    <button
+      class='rounded-full text-xl bg-green-900 text-white p-3'
+      *ngIf='session.host === user?.id && players.length > 1' (click)="startSession()"
+    >
+      <mat-icon>play_arrow</mat-icon>
+      Start Game
+    </button>
+
+    <button
+      *ngIf='!myPlayer'
+      class='rounded-full text-xl bg-green-900 text-white p-3'
+      [disabled]='!joinGameForm.valid'
+      (click)='joinGame()'
+    >
+      Join the game
+    </button>
+  </div>
+
+  <ng-container *ngIf='session.started && !session.finished'>
     <div class='flex'>
       <div>
         Phase: <span class='font-bold text-lg'>{{session.phase === 0 ? 'Growing' : 'Eating' }}</span>
@@ -89,11 +106,15 @@
               (click)='actionAnimal(card)'
               [actioned]='card.canBeActioned || myPlayer.attack?.animalIndex === card.index'
             >
-              <div class='head uppercase text-center'>
-              <span *ngIf='session.phase === 1'>
-                {{card.food}}/{{card.requiredFood}}
-              </span>
-                Animal
+              <div class='head uppercase text-center flex w-full justify-center'>
+                <ng-container *ngIf='session.phase === 1'>
+                  <mat-icon>eco</mat-icon>
+                  <span class='mr-3'>{{card.food}}/{{card.requiredFood}}</span>
+                </ng-container>
+                <span>Animal</span>
+                <span *ngIf='card.poisoned'>
+                  <mat-icon>sentiment_very_dissatisfied</mat-icon>
+                </span>
               </div>
               <ng-container *ngFor='let property of myPlayer.properties'>
                 <div
@@ -112,8 +133,8 @@
                 <div class='border-4'
                      *ngFor='let property of card.properties'
                      [class.pointer-events-none]='session.phase === 0 || foodSelected'
-                     [class.border-transparent]='selectedPropertyIndex !== card.index || selectedProperty !== property'
-                     [class.border-amber-300]='selectedPropertyIndex === card.index && selectedProperty === property'
+                     [class.border-transparent]='selectedAnimalIndex !== card.index || selectedProperty !== property'
+                     [class.border-amber-300]='selectedAnimalIndex === card.index && selectedProperty === property'
                      (click)='selectActionProperty($event, property, card)'
                 >
                   <feature-property
@@ -143,7 +164,7 @@
               cdkDrag
               [cdkDragData]='card'
               (click)='selectProperty(card, i)'
-              [actioned]='selectedPropertyIndex === i && session.phase === 0'
+              [actioned]='selectedAnimalIndex === i && session.phase === 0'
               [type]='card.type1'
             >
               <feature-property class='head' [type]='card.type1'></feature-property>
@@ -193,11 +214,15 @@
             [actioned]='card.canBeActioned'
             (click)='actionEnemyAnimal(card, player)'
           >
-            <div class='head uppercase text-center'>
-                <span *ngIf='session.phase === 1'>
-                  {{card.food}}/{{card.requiredFood}}
-                </span>
-              Animal
+            <div class='head uppercase text-center flex w-full justify-center'>
+              <ng-container *ngIf='session.phase === 1'>
+                <mat-icon>eco</mat-icon>
+                <span class='mr-3'>{{card.food}}/{{card.requiredFood}}</span>
+              </ng-container>
+              <span>Animal</span>
+              <span *ngIf='card.poisoned'>
+                <mat-icon>sentiment_very_dissatisfied</mat-icon>
+              </span>
             </div>
             <ng-container *ngFor='let property of player.properties'>
               <div
@@ -223,4 +248,23 @@
       </mat-expansion-panel>
     </mat-accordion>
   </ng-container>
+
+  <div *ngIf='session.finished' class='flex items-center justify-center'>
+    <div  class='rounded-3xl w-96 overflow-hidden border-2'>
+      <div
+        *ngFor='let player of players; let i = index'
+        class='text-xl font-bold flex items-center text-white py-2 px-4'
+        [class.bg-amber-400]='i===0'
+        [class.bg-slate-400]='i===1'
+        [class.bg-amber-700]='i===2'
+        [class.bg-lime-50]='i > 2'
+        [class.text-green-900]='i > 2'
+      >
+        <span class='mr-3'>{{i+1}}</span>
+        <img class='rounded-full w-9 mr-3' *ngIf='player.imageUrl' [src]='player.imageUrl' alt='{{player.name}}' />
+        <span class='flex-grow'>{{player.name}}</span>
+        <span class='text-2xl'>{{player.score}}</span>
+      </div>
+    </div>
+  </div>
 </ng-container>

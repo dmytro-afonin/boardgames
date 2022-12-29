@@ -1,38 +1,35 @@
-<div *ngFor='let session of sessions$ | async' class='mb-3'>
-  <ui-card>
-    <div class='flex items-center mb-3'>
-      <mat-card-title class='flex-grow'>{{session.name}}</mat-card-title>
+<div *ngFor='let session of sessions$ | async' class='mb-3 rounded-3xl bg-lime-50 border-2 shadow-lg p-3'>
+  <div class='flex items-center mb-3'>
+    <mat-card-title class='flex-grow'>{{session.name}}</mat-card-title>
 
-      <div class='mr-3'>
-        <a mat-raised-button routerLink='session/{{session.id}}' color='primary'>
-          JOIN
-        </a>
-      </div>
+    <div class='mr-3'>
+      <a routerLink='session/{{session.id}}' class='bg-green-900 rounded-full uppercase py-2 px-3 text-white'>
+        JOIN
+      </a>
     </div>
+  </div>
 
-    <mat-chip-listbox aria-label="players list">
-      <mat-chip
-        *ngFor='let user of session.usersArray'
-        [color]='user.id === session.host ? "primary" : undefined'
-      >
-        <img *ngIf='user.imageUrl' matChipAvatar src="{{user.imageUrl}}" referrerpolicy="no-referrer" alt="{{user.name}}"/>
-        <mat-icon matChipAvatar *ngIf='!user.imageUrl'>account_circle</mat-icon>
-        {{user.name}}
-      </mat-chip>
-    </mat-chip-listbox>
-  </ui-card>
+  <mat-chip-listbox aria-label="players list">
+    <mat-chip
+      *ngFor='let user of session.usersArray'
+      [color]='user.id === session.host ? "primary" : undefined'
+    >
+      <img *ngIf='user.imageUrl' matChipAvatar src="{{user.imageUrl}}" referrerpolicy="no-referrer" alt="{{user.name}}"/>
+      <mat-icon matChipAvatar *ngIf='!user.imageUrl'>account_circle</mat-icon>
+      {{user.name}}
+    </mat-chip>
+  </mat-chip-listbox>
 </div>
 
-<ui-card>
-  <form [formGroup]='formGroup' (ngSubmit)='createSession()'>
+<div class='mb-3 rounded-3xl bg-lime-50 border-2 shadow-lg p-3 items-center'>
+  <form [formGroup]='formGroup' (ngSubmit)='createSession()' class='w-full flex'>
     <mat-form-field appearance="fill" class='mr-4'>
       <mat-label>Session name</mat-label>
       <input formControlName='session' matInput placeholder="Session name">
-      <mat-hint>Hint</mat-hint>
     </mat-form-field>
 
-    <button [disabled]='formGroup.invalid' mat-fab color="primary" aria-label="create new session">
+    <button [disabled]='formGroup.invalid' class='flex items-center bg-green-900 rounded-full uppercase py-2 px-3 text-white'>
       <mat-icon>add</mat-icon>
     </button>
   </form>
-</ui-card>
+</div>

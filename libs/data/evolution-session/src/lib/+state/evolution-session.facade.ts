@@ -6,11 +6,12 @@ import { User } from '@boardgames/data/auth';
 import {
   Animal,
   CARDS_BASE_SCHEME,
-  CardSchemeItem, CardTypes, DoubleProperty,
+  CardSchemeItem,
+  DoubleProperty,
   EvolutionSessionEntity,
   HandCard,
   Phase,
-  Player, WEIGHT_PROPERTY_MAP
+  Player
 } from './evolution-session.models';
 
 @Injectable()
@@ -94,10 +95,12 @@ export class EvolutionSessionFacade {
 
     this.#processAction(player, session);
   }
-  startSession(evolutionSession: EvolutionSessionEntity): void {
+  startSession(user: User, evolutionSession: EvolutionSessionEntity): void {
+    evolutionSession.players[user.id].name = user.name;
+
     const session: EvolutionSessionEntity = JSON.parse(JSON.stringify(evolutionSession));
     const playerIds: string[] = Object.keys(session.players);
-    for (let i = 0; i < 40; i ++) {
+    for (let i = 0; i < 6; i ++) {
       for (let j = 0; j < playerIds.length; j++) {
         const player = session.players[playerIds[j]];
         player.order = j;
@@ -167,9 +170,6 @@ export class EvolutionSessionFacade {
     const availPlayers: Player[] = allPlayers.filter(p => !p.endPhase);
 
     if (!availPlayers.length) {
-      if (!session.cards.length) {
-        // todo calculate winner
-      }
       return this.#setupNewPhase(session);
     }
 
@@ -191,6 +191,14 @@ export class EvolutionSessionFacade {
         phase: Phase.ACTING,
         eat: this.#getFood(allPlayers.length),
         currentPlayer: session.firstPlayer
+      }
+    }
+    if (!session.cards.length) {
+      // todo calc score
+      return {
+        ...session,
+        finished: true,
+        currentPlayer: ''
       }
     }
 
@@ -348,7 +356,8 @@ export class EvolutionSessionFacade {
       animals: [],
       properties: [],
       endPhase: false,
-      attack: null
+      attack: null,
+      score: 0
     };
   }
 

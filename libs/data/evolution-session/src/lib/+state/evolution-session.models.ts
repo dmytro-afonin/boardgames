@@ -89,6 +89,7 @@ export interface Player {
   properties: DoubleProperty[];
   endPhase: boolean;
   attack: Attack | null;
+  score: 0;
 }
 export interface Attack {
 
@@ -107,6 +108,7 @@ export interface EvolutionSessionEntity {
   host: string;
   eat: number;
   phase: Phase;
+  finished: boolean;
   players: Record<string, Player>;
 }
 
