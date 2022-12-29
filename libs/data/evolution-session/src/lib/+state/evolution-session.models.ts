@@ -71,6 +71,7 @@ export interface Animal {
   food: number;
   requiredFood: number;
   fat: number;
+  attacked: boolean;
   poisoned?: boolean;
   hibernation?: boolean;
   hibernationCooldown?: number;
@@ -87,11 +88,13 @@ export interface Player {
   animals: Animal[];
   properties: DoubleProperty[];
   endPhase: boolean;
-  attack?: {
-    carnivorous: number;
-    player: string;
-    animalIndex: number;
-  }
+  attack: Attack | null;
+}
+export interface Attack {
+
+  carnivorous: number;
+  player: string;
+  animalIndex: number;
 }
 
 export interface EvolutionSessionEntity {

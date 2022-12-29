@@ -71,6 +71,14 @@ export class EvolutionSessionFacade {
     this.store.dispatch(EvolutionSessionActions.updateSession({evolutionSession}));
   }
 
+  respondAttack(player: Player, session: EvolutionSessionEntity): void {
+    const prevPlayerId = player.attack?.player as string;
+    session.currentPlayer = prevPlayerId;
+    player.attack = null;
+    session.players[player.id] = player;
+    this.#processAction(session.players[prevPlayerId], session);
+  }
+
   addPropertyToEnemyAnimal(player: Player, session: EvolutionSessionEntity, enemy: Player): void {
     if (!player.hand.length) {
       player.endPhase = true;
@@ -147,7 +155,7 @@ export class EvolutionSessionFacade {
     newSession.players[player.id] = player;
 
     const evolutionSession: Partial<EvolutionSessionEntity> = {
-      id: newSession.id,
+      ...newSession,
       ...this.#getSessionUpdateForAction(player, newSession)
     }
 
@@ -166,8 +174,8 @@ export class EvolutionSessionFacade {
     }
 
     return {
+      ...session,
       currentPlayer: this.#findNextPlayer(allPlayers, player),
-      players: session.players
     }
   }
 
@@ -269,9 +277,9 @@ export class EvolutionSessionFacade {
         }
         return a.food >= a.requiredFood;
       })
-      .map(a => {
+      .map((a, i) => {
         const hibernationCooldown = this.#getHibernationCooldown(a);
-        return {...a, food: 0, hibernation: false, hibernationCooldown}
+        return {...a, index: i, food: 0, hibernation: false, hibernationCooldown, attacked: false}
       });
   }
 
@@ -320,13 +328,13 @@ export class EvolutionSessionFacade {
 
   #getFood(players: number): number {
     switch (players) {
-      case 2: return this.#getDiceNumber() + 2;
-      case 3: return this.#getDiceNumber() + this.#getDiceNumber();
-      default: return this.#getDiceNumber() + this.#getDiceNumber() + 2;
+      case 2: return this.getDiceNumber() + 2;
+      case 3: return this.getDiceNumber() + this.getDiceNumber();
+      default: return this.getDiceNumber() + this.getDiceNumber() + 2;
     }
   }
 
-  #getDiceNumber(): number {
+  getDiceNumber(): number {
     return this.#getRandomIndex(6) + 1;
   }
 
@@ -339,7 +347,8 @@ export class EvolutionSessionFacade {
       hand: [],
       animals: [],
       properties: [],
-      endPhase: false
+      endPhase: false,
+      attack: null
     };
   }
 

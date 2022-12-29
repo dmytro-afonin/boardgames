@@ -19,13 +19,15 @@
 
       <div class='flex-grow flex justify-center'>
         <button
-          class='text-white rounded-full flex items-center px-3 transition-all  hover:scale-105'
+          class='text-white rounded-full flex items-center px-3 transition-all hover:scale-105'
           [class.hover:bg-green-800]='!foodSelected'
           [class.bg-green-900]='!foodSelected'
           [class.bg-amber-300]='foodSelected'
           [class.hover:bg-amber-400]='foodSelected'
+          [class.pointer-events-none]='myPlayer.id !== session.currentPlayer || myPlayer.attack'
           (click)='selectFood()'
-          *ngIf='session.phase === 1'>
+          *ngIf='session.phase === 1'
+        >
           <mat-icon>eco</mat-icon> X {{session.eat}}
         </button>
       </div>
@@ -35,37 +37,38 @@
     </div>
     <mat-accordion #accordion=matAccordion multi>
       <mat-expansion-panel *ngFor='let player of players' [expanded]='true' class='bg-lime-50'>
-        <ng-container *ngIf='player.id === myPlayer.id'>
 
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <img class='rounded-full w-9 mr-3' *ngIf='myPlayer.imageUrl' [src]='myPlayer.imageUrl' alt='{{myPlayer.name}}' />
-              {{ myPlayer.name }}
-            </mat-panel-title>
+        <mat-expansion-panel-header *ngIf='player.id === myPlayer.id'>
+          <mat-panel-title>
+            <span class='text-lg font-bold mr-3'>{{player.order + 1}}</span>
+            <img class='rounded-full w-9 mr-3' *ngIf='myPlayer.imageUrl' [src]='myPlayer.imageUrl' alt='{{myPlayer.name}}' />
+            {{ myPlayer.name }}
+          </mat-panel-title>
 
-            <mat-panel-description>
-              <div class='flex w-full'>
-                <div class='flex-grow'>
-                <span *ngIf='session.currentPlayer === myPlayer.id'>
-                  Use Drag & Drop to place new animals. Use click to add new properties
-                </span>
+          <mat-panel-description>
+            <div class='flex w-full'>
+              <div class='flex-grow'>
+              <span *ngIf='session.currentPlayer === myPlayer.id'>
+                Use Drag & Drop to place new animals. Use click to add new properties
+              </span>
 
-                  <span *ngIf='session.currentPlayer !== myPlayer.id'>
-                  Wait until your turn
-                </span>
-                </div>
-                <button
-                  class='bg-green-900 rounded-full text-white flex items-center p-1 pr-2'
-                  *ngIf='session.currentPlayer === myPlayer.id && !myPlayer.attack'
-                  (click)="endPhase()"
-                >
-                  <mat-icon>next_plan</mat-icon>
-                  <span class='pl-3'>End phase</span>
-                </button>
+                <span *ngIf='session.currentPlayer !== myPlayer.id'>
+                Wait until your turn
+              </span>
               </div>
-            </mat-panel-description>
-          </mat-expansion-panel-header>
+              <button
+                class='bg-green-900 rounded-full text-white flex items-center p-1 pr-2'
+                *ngIf='session.currentPlayer === myPlayer.id && !myPlayer.attack'
+                (click)="endPhase()"
+              >
+                <mat-icon>next_plan</mat-icon>
+                <span class='pl-3'>End phase</span>
+              </button>
+            </div>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
 
+        <ng-container *ngIf='player.id === myPlayer.id'>
           <div
             #myDeck="cdkDropList"
             cdkDropList
@@ -78,13 +81,13 @@
             (cdkDropListDropped)="animalDropped($event)"
           >
             <feature-animal
-              [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
               *ngFor="let card of myPlayer.animals"
+              [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
               class='card mr-3 last:mr-0'
               cdkDrag
               [cdkDragData]='card'
               (click)='actionAnimal(card)'
-              [actioned]='card.canBeActioned'
+              [actioned]='card.canBeActioned || myPlayer.attack?.animalIndex === card.index'
             >
               <div class='head uppercase text-center'>
               <span *ngIf='session.phase === 1'>
@@ -106,13 +109,18 @@
               </ng-container>
 
               <div class='pb-3'>
-                <feature-property
-                  *ngFor='let property of card.properties'
-                  [class.pointer-events-none]='session.phase === 0'
-                  (click)='selectActionProperty($event, property, card)'
-                  [type]='property'
+                <div class='border-4'
+                     *ngFor='let property of card.properties'
+                     [class.pointer-events-none]='session.phase === 0 || foodSelected'
+                     [class.border-transparent]='selectedPropertyIndex !== card.index || selectedProperty !== property'
+                     [class.border-amber-300]='selectedPropertyIndex === card.index && selectedProperty === property'
+                     (click)='selectActionProperty($event, property, card)'
                 >
-                </feature-property>
+                  <feature-property
+                    [type]='property'
+                  >
+                  </feature-property>
+                </div>
               </div>
             </feature-animal>
           </div>
@@ -152,60 +160,66 @@
           </div>
         </ng-container>
 
-        <ng-container *ngIf='player.id !== myPlayer.id'>
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <img class='rounded-full w-9 mr-3' *ngIf='player.imageUrl' [src]='player.imageUrl' alt='{{player.name}}' />
-              {{ player.name }}
-            </mat-panel-title>
+        <mat-expansion-panel-header *ngIf='player.id !== myPlayer.id'>
+          <mat-panel-title>
+            <span class='text-lg font-bold mr-3'>{{player.order + 1}}</span>
+            <img class='rounded-full w-9 mr-3' *ngIf='player.imageUrl' [src]='player.imageUrl' alt='{{player.name}}' />
+            {{ player.name }}
+          </mat-panel-title>
 
-            <mat-panel-description>
-              <span
-                class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
-                *ngIf='player.id === session.currentPlayer'
-              >
-                Current Turn
-              </span>
-              <span class='bg-green-900 rounded-full text-lime-50 py-1 px-3' *ngIf='player.endPhase'>Finished</span>
-            </mat-panel-description>
-          </mat-expansion-panel-header>
-
-          <div class='list flex items-stretch p-3'>
-            <feature-animal
-              class='mr-3 last:mr-0'
-              [class.cursor-pointer]='card.canBeActioned'
-              *ngFor="let card of player.animals"
-              [actioned]='card.canBeActioned'
-              (click)='actionEnemyAnimal(card, player)'
+          <mat-panel-description>
+            <span
+              class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
+              *ngIf='player.id === session.currentPlayer'
             >
-              <div class='head uppercase text-center'>
+              Current Turn
+            </span>
+
+            <span
+              class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
+              *ngIf='player.id === session.firstPlayer'
+            >
+              First Turn
+            </span>
+            <span class='bg-green-900 rounded-full text-lime-50 py-1 px-3' *ngIf='player.endPhase'>Finished</span>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class='list flex items-stretch p-3' *ngIf='player.id !== myPlayer.id'>
+          <feature-animal
+            class='mr-3 last:mr-0'
+            [class.cursor-pointer]='card.canBeActioned'
+            *ngFor="let card of player.animals"
+            [actioned]='card.canBeActioned'
+            (click)='actionEnemyAnimal(card, player)'
+          >
+            <div class='head uppercase text-center'>
                 <span *ngIf='session.phase === 1'>
                   {{card.food}}/{{card.requiredFood}}
                 </span>
-                Animal
-              </div>
-              <ng-container *ngFor='let property of player.properties'>
-                <div
-                  *ngIf='property.animal1 === card.index || property.animal2 === card.index'
-                  class='relative h-7'>
-                  <feature-property
-                    *ngIf='property.animal1 === card.index'
-                    class='absolute w-full left-28'
-                    [type]='property.property'
-                  >
-                  </feature-property>
-                </div>
-              </ng-container>
-              <div class='pb-3'>
+              Animal
+            </div>
+            <ng-container *ngFor='let property of player.properties'>
+              <div
+                *ngIf='property.animal1 === card.index || property.animal2 === card.index'
+                class='relative h-7'>
                 <feature-property
-                  *ngFor='let property of card.properties'
-                  [type]='property'
+                  *ngIf='property.animal1 === card.index'
+                  class='absolute w-full left-28'
+                  [type]='property.property'
                 >
                 </feature-property>
               </div>
-            </feature-animal>
-          </div>
-        </ng-container>
+            </ng-container>
+            <div class='pb-3'>
+              <feature-property
+                *ngFor='let property of card.properties'
+                [type]='property'
+              >
+              </feature-property>
+            </div>
+          </feature-animal>
+        </div>
       </mat-expansion-panel>
     </mat-accordion>
   </ng-container>

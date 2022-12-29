@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import {
   Animal,
+  Attack,
   CardTypes,
   DoubleProperty,
   EvolutionSessionEntity,
@@ -47,6 +48,8 @@ export class ContainerComponent implements OnInit {
 
   actionAnimal(animal: Animal): void {
     if (animal.canBeActioned) {
+      this.resetAnimalsActions();
+
       if (this.session.phase === Phase.GROWING) {
         this.actionGrowingPhase(animal);
       } else {
@@ -57,27 +60,69 @@ export class ContainerComponent implements OnInit {
 
   selectActionProperty(event: MouseEvent, prop: CardTypes, animal: Animal): void {
     event.stopPropagation();
+    this.resetAnimalsActions();
 
+    if (this.myPlayer.attack?.animalIndex === animal.index) {
+      if (this.selectedProperty === CardTypes.TAIL_LOSS) {
+        const carnivorous = this.session.players[this.myPlayer.attack.player].animals[this.myPlayer.attack.carnivorous];
+        carnivorous.attacked = true;
+        this.handleFeedAnimal(carnivorous);
+        const propIndex = animal.properties.findIndex(a => a === prop);
+        animal.properties.splice(propIndex, 1);
+        this.sessionFacade.respondAttack(this.myPlayer, this.session);
+        return;
+      }
+      switch (prop) {
+        case CardTypes.TAIL_LOSS:
+          return this.handleTailLoss(animal, prop);
+        case CardTypes.RUNNING:
+          return this.handleRunning(animal);
+        case CardTypes.MIMICRY:
+          return this.handleMimicry(animal);
+      }
+    } else {
+      this.selectedProperty = prop;
+      this.selectedPropertyIndex = animal.index;
+
+      switch (prop) {
+        case CardTypes.GRAZING:
+          return this.handleGrazing();
+        case CardTypes.HIBERNATION_ABILITY:
+          return this.handleHibernation(animal);
+        case CardTypes.PIRACY:
+          return this.handlePiracy(animal);
+        case CardTypes.CARNIVOROUS:
+          return this.handleCarnivorous(animal);
+      }
+    }
+  }
+  handleMimicry(animal: Animal): void {
+    const attack: Attack = this.myPlayer.attack as Attack;
+    const attacker: Player = this.session.players[attack.player];
+    const carnivorous = attacker.animals[attack.carnivorous];
+    this.myPlayer.animals.forEach(a => {
+      a.canBeActioned = this.canBeMimicryTarget(this.myPlayer, animal, carnivorous, a);
+    });
+  }
+  handleRunning(animal: Animal): void {
+    const attack: Attack = this.myPlayer.attack as Attack;
+    const attacker: Player = this.session.players[attack.player];
+    const carnivorous = attacker.animals[attack.carnivorous];
+    carnivorous.attacked = true;
+
+    if (this.sessionFacade.getDiceNumber() < 4) {
+      this.eatAnimal(carnivorous, animal, this.myPlayer, attacker);
+    }
+
+    this.sessionFacade.respondAttack(this.myPlayer, this.session);
+  }
+  handleTailLoss(animal: Animal, prop: CardTypes): void {
     this.selectedProperty = prop;
     this.selectedPropertyIndex = animal.index;
-
-    console.log(this.selectedProperty);
-    console.log(this.selectedPropertyIndex);
-
-    switch (prop) {
-      case CardTypes.GRAZING:
-        return this.handleGrazing();
-      case CardTypes.HIBERNATION_ABILITY:
-        return this.handleHibernation(animal);
-      case CardTypes.PIRACY:
-        return this.handlePiracy(animal);
-      case CardTypes.CARNIVOROUS:
-        return this.handleCarnivorous(animal);
-    }
   }
 
   handleCarnivorous(animal: Animal): void {
-    if (!this.canEat(animal)) {
+    if (!this.canEat(animal) || animal.attacked) {
       return;
     }
 
@@ -145,7 +190,6 @@ export class ContainerComponent implements OnInit {
 
   handleHibernation(animal: Animal): void {
     console.log({animal});
-    animal.hibernation = false;
     if (!animal.hibernationCooldown && !animal.hibernation) {
       animal.hibernation = true;
       this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
@@ -171,37 +215,81 @@ export class ContainerComponent implements OnInit {
       case CardTypes.PIRACY:
         animal.food--;
         this.handleFeedAnimal(this.myPlayer.animals[this.selectedPropertyIndex as number]);
-        this.cancelSelectedProperty();
-        return this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
+        this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
+        break;
       case CardTypes.CARNIVOROUS:
-        return this.handleCarnivorousAttack(animal, player);
+        this.handleCarnivorousAttack(animal, player);
+        break;
+      case CardTypes.MIMICRY:
+        this.becameMimicryTarget(animal, player);
+    }
+    this.cancelSelectedProperty();
+  }
+  becameMimicryTarget(animal: Animal, player: Player): void {
+    if (this.myPlayer.attack && animal.index !== this.selectedPropertyIndex) {
+      const attack: Attack = this.myPlayer.attack as Attack;
+      const attacker: Player = this.session.players[attack.player];
+      const carnivorous = attacker.animals[attack.carnivorous];
+      this.eatAnimal(carnivorous, animal, player, attacker);
+      this.sessionFacade.respondAttack(this.myPlayer, this.session);
+    }
+  }
+  handleCarnivorousAttack(animal: Animal, player: Player): void {
+    const hasRunning = animal.properties.includes(CardTypes.RUNNING);
+    const hasTailLoss = animal.properties.includes(CardTypes.TAIL_LOSS);
+    const carnivorous = this.myPlayer.animals[this.selectedPropertyIndex as number];
+
+    const hasMimicry = animal.properties.includes(CardTypes.MIMICRY);
+    const hasMimicryTargets = this.getMimicryTarget(player, animal, carnivorous);
+    const mimicryWorks = hasMimicry && hasMimicryTargets;
+
+    if (hasRunning || mimicryWorks || hasTailLoss) {
+      player.attack = {
+        carnivorous: this.selectedPropertyIndex as number,
+        player: this.myPlayer.id,
+        animalIndex: animal.index
+      };
+      this.sessionFacade.createAttack(player, this.session);
+    } else {
+      this.eatAnimal(carnivorous, animal, player, this.myPlayer);
+      this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
     }
   }
 
-  handleCarnivorousAttack(animal: Animal, player: Player): void {
-    const hasRunning = animal.properties.includes(CardTypes.RUNNING);
-    const hasMimicry = animal.properties.includes(CardTypes.MIMICRY);
-    const hasTailLoss = animal.properties.includes(CardTypes.TAIL_LOSS);
-    const hasPoison = animal.properties.includes(CardTypes.POISONOUS);
-    const carnivorous = this.myPlayer.animals[this.selectedPropertyIndex as number];
-    if (hasPoison) {
+  getMimicryTarget(player: Player, animal: Animal, carnivorous: Animal): Animal | undefined {
+    return player.animals.find(a => {
+      return this.canBeMimicryTarget(player, animal, carnivorous, a);
+    });
+  }
+  canBeMimicryTarget(player: Player, current: Animal, carnivorous: Animal, animal: Animal): boolean {
+    const notCurrent = animal.index !== current.index;
+    const canAttack = this.canAttack(carnivorous, animal, player);
+    const notMimicry = !animal.properties.includes(CardTypes.MIMICRY);
+    return notCurrent && canAttack && notMimicry;
+  }
+  eatAnimal(carnivorous: Animal, animal: Animal, player: Player, attaker: Player): void {
+    this.handleFeedAnimal(carnivorous);
+    if (this.canEat(carnivorous)) {
+      this.handleFeedAnimal(carnivorous);
+    }
+    if (animal.properties.includes(CardTypes.POISONOUS)) {
       carnivorous.poisoned = true;
     }
+    carnivorous.attacked = true;
+    player.animals.splice(animal.index, 1);
+    player.animals.forEach((a, i) => a.index = i);
 
-    if (hasRunning || hasMimicry || hasTailLoss) {
-      player.attack = {
-        carnivorous: this.selectedPropertyIndex as number,
-        player: player.id,
-        animalIndex: animal.index
-      }
-      this.sessionFacade.createAttack(player, this.session);
+    const myScavenger = attaker.animals.find(a => a.properties.includes(CardTypes.SCAVENGER) && this.canEat(a));
+    if (myScavenger) {
+      this.handleFeedAnimal(myScavenger);
     } else {
-      this.handleFeedAnimal(carnivorous);
-      if (this.canEat(carnivorous)) {
-        this.handleFeedAnimal(carnivorous);
+      // todo find next player from current one and so on (like in facade)
+      for (const player of this.players) {
+        const scavenger = player.animals.find(a => a.properties.includes(CardTypes.SCAVENGER) && this.canEat(a));
+        if (scavenger) {
+          this.handleFeedAnimal(scavenger);
+        }
       }
-      player.animals.splice(animal.index, 1);
-      this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
     }
   }
 
@@ -224,7 +312,6 @@ export class ContainerComponent implements OnInit {
       }
     });
     this.foodSelected = false;
-    this.resetAnimalsActions();
     this.sessionFacade.feedAnimal(this.myPlayer, this.session);
   }
 
@@ -273,6 +360,8 @@ export class ContainerComponent implements OnInit {
 
   actionEnemyAnimal(animal: Animal, enemy: Player): void {
     if (animal.canBeActioned) {
+      this.resetAnimalsActions();
+
       if (this.session.phase === Phase.GROWING) {
         this.actionEnemyGrowingPhase(animal, enemy);
       } else {
@@ -360,7 +449,14 @@ export class ContainerComponent implements OnInit {
   }
   animalDropped(event: CdkDragDrop<Animal[]>) {
     if (event.previousContainer !== event.container) {
-      const animal: Animal = {index: event.currentIndex, food: 0, properties: [], requiredFood: 1, fat: 0};
+      const animal: Animal = {
+        index: event.currentIndex,
+        food: 0,
+        properties: [],
+        requiredFood: 1,
+        fat: 0,
+        attacked: false
+      };
       this.myPlayer.properties.forEach(p => {
         if (p.animal1 >= event.currentIndex) {
           p.animal1++;
@@ -406,7 +502,7 @@ export class ContainerComponent implements OnInit {
           this.sessionFacade.joinSession(this.user, this.session.id as string);
         }
         this.myPlayer = players[this.user.id];
-        this.players = Object.values(players);
+        this.players = Object.values(players).sort((a,b) => a.order > b.order ? 1 : -1);
       })
     ).subscribe();
   }
