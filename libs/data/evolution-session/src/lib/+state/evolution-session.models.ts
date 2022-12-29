@@ -71,6 +71,7 @@ export interface Animal {
   food: number;
   requiredFood: number;
   fat: number;
+  poisoned?: boolean;
   hibernation?: boolean;
   hibernationCooldown?: number;
   canBeActioned?: boolean;
@@ -86,11 +87,10 @@ export interface Player {
   animals: Animal[];
   properties: DoubleProperty[];
   endPhase: boolean;
-  action?: {
-    actionType: CardTypes;
+  attack?: {
+    carnivorous: number;
     player: string;
-    playerCardIndex1: number;
-    playerCardIndex2?: number;
+    animalIndex: number;
   }
 }
 

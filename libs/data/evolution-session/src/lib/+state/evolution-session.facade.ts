@@ -32,6 +32,7 @@ export class EvolutionSessionFacade {
     select(EvolutionSessionSelectors.selectEntity),
   );
 
+
   setCurrentSession(selectedId: string): void {
     this.store.dispatch(EvolutionSessionActions.setSelectedSession({selectedId}));
   }
@@ -50,6 +51,26 @@ export class EvolutionSessionFacade {
 
     this.#processAction(player, session);
   }
+
+  feedAnimal(player: Player, session: EvolutionSessionEntity): void {
+    this.#processAction(player, session);
+  }
+
+  updateSessionFood(player: Player, session: EvolutionSessionEntity): void {
+    this.#processAction(player, session);
+  }
+
+  createAttack(player: Player, session: EvolutionSessionEntity): void {
+
+    const evolutionSession: Partial<EvolutionSessionEntity> = {
+      id: session.id,
+      players: {[player.id]: player},
+      currentPlayer: player.id,
+    }
+
+    this.store.dispatch(EvolutionSessionActions.updateSession({evolutionSession}));
+  }
+
   addPropertyToEnemyAnimal(player: Player, session: EvolutionSessionEntity, enemy: Player): void {
     if (!player.hand.length) {
       player.endPhase = true;
@@ -75,7 +96,6 @@ export class EvolutionSessionFacade {
         session.cards = this.#addCard(player, session.cards);
       }
     }
-    debugger;
     session.started = true;
     const randomPlayerIndex = this.#getRandomIndex(playerIds.length);
     session.firstPlayer = playerIds[randomPlayerIndex];
@@ -241,6 +261,9 @@ export class EvolutionSessionFacade {
   #killHungryAnimals(animals: Animal[]): Animal[] {
     return animals
       .filter((a) => {
+        if (a.poisoned) {
+          return false;
+        }
         if (a.hibernation) {
           return true;
         }
