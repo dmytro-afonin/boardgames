@@ -203,7 +203,7 @@ export class ContainerComponent implements OnInit {
   }
 
   handlePiracy(animal: Animal): void {
-    if (!this.canEat(animal) || animal.piracyUsed) {
+    if (!this.canEat(animal) || animal.piracyUsed || (animal.food >= animal.requiredFood)) {
       this.cancelSelectedProperty();
       return;
     }
