@@ -183,7 +183,7 @@ export class ContainerComponent implements OnInit {
 
     const cIsBig = carnivorous.properties.includes(CardTypes.HIGH_BODY_WEIGHT);
     const pIsBig = pray.properties.includes(CardTypes.HIGH_BODY_WEIGHT);
-    if (cIsBig !== pIsBig) {
+    if (pIsBig && !cIsBig) {
       return false;
     }
 
