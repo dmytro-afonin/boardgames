@@ -267,6 +267,13 @@ export class ContainerComponent implements OnInit {
       this.cancelSelectedProperty();
     }
   }
+  // todo communication disappear after end phase
+  // todo check communications after eat animal
+  // todo remove actions after end phase
+  // todo hide endPhase until animals cant eat
+  // todo understand you are attacked
+  // todo recalc required food after remove parasite
+  // todo show fat
   handleCarnivorousAttack(animal: Animal, player: Player): void {
     const hasRunning = animal.properties.includes(CardTypes.RUNNING);
     const hasTailLoss = animal.properties.includes(CardTypes.TAIL_LOSS);

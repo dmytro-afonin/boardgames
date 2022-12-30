@@ -115,6 +115,9 @@
                 <span *ngIf='card.poisoned'>
                   <mat-icon>sentiment_very_dissatisfied</mat-icon>
                 </span>
+                <span *ngIf='card.fat' class='text-amber-300 font-bold'>
+                  <mat-icon>water_drop</mat-icon><span class='ml-3'>{{card.fat}}</span>
+                </span>
               </div>
               <ng-container *ngFor='let property of myPlayer.properties'>
                 <div
@@ -222,6 +225,9 @@
               <span>Animal</span>
               <span *ngIf='card.poisoned'>
                 <mat-icon>sentiment_very_dissatisfied</mat-icon>
+              </span>
+              <span *ngIf='card.fat' class='text-amber-300 font-bold'>
+                  <mat-icon>water_drop</mat-icon><span class='ml-3'>{{card.fat}}</span>
               </span>
             </div>
             <ng-container *ngFor='let property of player.properties'>
