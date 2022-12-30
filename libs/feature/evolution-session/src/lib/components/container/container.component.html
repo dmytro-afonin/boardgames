@@ -40,7 +40,7 @@
           [class.bg-green-900]='!foodSelected'
           [class.bg-amber-300]='foodSelected'
           [class.hover:bg-amber-400]='foodSelected'
-          [class.pointer-events-none]='myPlayer.id !== session.currentPlayer || myPlayer.attack'
+          [class.pointer-events-none]='myPlayer.id !== session.currentPlayer || myPlayer.attack || !session.eat'
           (click)='selectFood()'
           *ngIf='session.phase === 1'
         >
