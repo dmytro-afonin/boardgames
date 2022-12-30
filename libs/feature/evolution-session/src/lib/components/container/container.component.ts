@@ -557,9 +557,17 @@ export class ContainerComponent implements OnInit {
       switchMap(() => this.sessionFacade.selectCurrentSession$),
       filter((s): s is EvolutionSessionEntity => !!s),
       tap((s) => {
-        if (this.session?.currentPlayer !== s.currentPlayer || this.session.phase !== s.phase) {
-          const audio = new Audio('assets/next_turn.mp3');
-          audio.play();
+        if (this.session) {
+          if (s.players[this.user.id].attack) {
+            const audio = new Audio('assets/attack.mp3');
+            audio.play();
+          } else if (this.session.phase !== s.phase) {
+            const audio = new Audio('assets/new_phase.mp3');
+            audio.play();
+          } else if (this.session.currentPlayer !== s.currentPlayer) {
+            const audio = new Audio('assets/next_turn.mp3');
+            audio.play();
+          }
         }
         this.session = JSON.parse(JSON.stringify(s));
         const players = this.session.players;

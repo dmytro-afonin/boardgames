@@ -194,10 +194,8 @@ export class EvolutionSessionFacade {
       }
     }
     if (!session.cards.length) {
-      // todo calc score
       return {
         ...this.#updateCards(session),
-        ...session,
         finished: true,
         currentPlayer: ''
       }
