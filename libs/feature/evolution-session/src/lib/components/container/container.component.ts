@@ -74,9 +74,11 @@ export class ContainerComponent implements OnInit {
 
     if (this.myPlayer.attack?.animalIndex === animal.index) {
       if (this.selectedProperty === CardTypes.TAIL_LOSS) {
-        const carnivorous = this.session.players[this.myPlayer.attack.player].animals[this.myPlayer.attack.carnivorous];
+        const attacker = this.session.players[this.myPlayer.attack.player];
+        const carnivorous = attacker.animals[this.myPlayer.attack.carnivorous];
         carnivorous.attacked = true;
         this.handleFeedAnimal(carnivorous);
+        this.handleCommunications(carnivorous, attacker, [CardTypes.COMMUNICATION]);
         const propIndex = animal.properties.findIndex(a => a === prop);
         animal.properties.splice(propIndex, 1);
         switch (prop) {
@@ -89,6 +91,9 @@ export class ContainerComponent implements OnInit {
             if (animal.hibernation) {
               animal.hibernation = false;
             }
+            break;
+          case CardTypes.PARASITE:
+            animal.requiredFood -= 2
             break;
         }
         this.sessionFacade.respondAttack(this.myPlayer, this.session);
@@ -107,6 +112,8 @@ export class ContainerComponent implements OnInit {
       this.selectedAnimalIndex = animal.index;
 
       switch (prop) {
+        case CardTypes.FAT_TISSUE:
+          return this.handleFatTissue(animal);
         case CardTypes.GRAZING:
           return this.handleGrazing();
         case CardTypes.HIBERNATION_ABILITY:
@@ -196,9 +203,11 @@ export class ContainerComponent implements OnInit {
   }
 
   handlePiracy(animal: Animal): void {
-    if (!this.canEat(animal)) {
+    if (!this.canEat(animal) || animal.piracyUsed) {
+      this.cancelSelectedProperty();
       return;
     }
+
     this.myPlayer.animals.forEach(a => {
       if (a.food && this.canEat(a)) {
         a.canBeActioned = true;
@@ -214,11 +223,11 @@ export class ContainerComponent implements OnInit {
   }
 
   handleHibernation(animal: Animal): void {
-    console.log({animal});
     if (!animal.hibernationCooldown && !animal.hibernation) {
       animal.hibernation = true;
       this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
     }
+    this.cancelSelectedProperty();
   }
 
   handleGrazing(): void {
@@ -226,6 +235,7 @@ export class ContainerComponent implements OnInit {
       this.session.eat--;
       this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
     }
+    this.cancelSelectedProperty();
   }
 
   actionFoodPhase(animal: Animal): void {
@@ -237,14 +247,10 @@ export class ContainerComponent implements OnInit {
   }
   propertySelectedActionFoodPhase(animal: Animal, player: Player): void {
     switch (this.selectedProperty) {
-      case CardTypes.PIRACY:
-        animal.food--;
-        this.handleFeedAnimal(this.myPlayer.animals[this.selectedAnimalIndex as number]);
-        this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
+      case CardTypes.PIRACY: {
+        this.handlePiracyAction(animal);
         break;
-      case CardTypes.FAT_TISSUE:
-        this.handleFatTissue(animal, player);
-        break;
+      }
       case CardTypes.CARNIVOROUS:
         this.handleCarnivorousAttack(animal, player);
         break;
@@ -253,12 +259,21 @@ export class ContainerComponent implements OnInit {
     }
     this.cancelSelectedProperty();
   }
-  handleFatTissue(animal: Animal, player: Player): void {
+  handlePiracyAction(animal: Animal): void {
+    animal.food--;
+    const pirate: Animal = this.myPlayer.animals[this.selectedAnimalIndex as number];
+    this.handleFeedAnimal(pirate);
+    pirate.piracyUsed = true;
+    this.handleCommunications(pirate, this.myPlayer,[CardTypes.COMMUNICATION]);
+    this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
+  }
+  handleFatTissue(animal: Animal): void {
     if ((animal.food < animal.requiredFood) && animal.fat) {
       animal.food++;
       animal.fat--;
-      this.sessionFacade.updateSessionFood(player, this.session);
+      this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
     }
+    this.cancelSelectedProperty();
   }
   becameMimicryTarget(animal: Animal): void {
     if (this.myPlayer.attack && animal.index !== this.selectedAnimalIndex) {
@@ -267,13 +282,6 @@ export class ContainerComponent implements OnInit {
       this.cancelSelectedProperty();
     }
   }
-  // todo communication disappear after end phase
-  // todo check communications after eat animal
-  // todo remove actions after end phase
-  // todo hide endPhase until animals cant eat
-  // todo understand you are attacked
-  // todo recalc required food after remove parasite
-  // todo show fat
   handleCarnivorousAttack(animal: Animal, player: Player): void {
     const hasRunning = animal.properties.includes(CardTypes.RUNNING);
     const hasTailLoss = animal.properties.includes(CardTypes.TAIL_LOSS);
@@ -318,7 +326,13 @@ export class ContainerComponent implements OnInit {
     carnivorous.attacked = true;
     player.animals.splice(animal.index, 1);
     player.animals.forEach((a, i) => a.index = i);
-
+    player.properties = player.properties.filter(p => p.animal1 !== animal.index && p.animal2 !== animal.index);
+    player.properties.forEach(p => {
+      if (p.animal1 > animal.index) {
+        p.animal1--;
+        p.animal2--;
+      }
+    });
     const myScavenger = attaker.animals.find(a => a.properties.includes(CardTypes.SCAVENGER) && this.canEat(a));
     if (myScavenger) {
       this.handleFeedAnimal(myScavenger);
@@ -331,18 +345,25 @@ export class ContainerComponent implements OnInit {
         }
       }
     }
+
+    this.handleCommunications(carnivorous, this.myPlayer,[CardTypes.COMMUNICATION]);
   }
 
   foodSelectedAntionFoodPhase(animal: Animal): void {
     this.handleFeedAnimal(animal);
     this.session.eat--;
+    this.handleCommunications(animal,  this.myPlayer,[CardTypes.COMMUNICATION, CardTypes.COOPERATION]);
+    this.foodSelected = false;
+    this.sessionFacade.feedAnimal(this.myPlayer, this.session);
+  }
 
-    const props = [...this.myPlayer.properties];
+  handleCommunications(animal: Animal, player: Player, types: CardTypes[]): void {
+    const props = [...player.properties];
 
     const directions = [{from: 'animal1', to: 'animal2'},{from: 'animal2', to: 'animal1'}];
 
     directions.forEach(d => {
-      let prop = props.find(p => p[d.from as keyof DoubleProperty] === animal.index && p.property !== CardTypes.SYMBIOSYS);
+      let prop = props.find(p => p[d.from as keyof DoubleProperty] === animal.index && types.includes(p.property));
       while (prop) {
         const animal = this.myPlayer.animals[prop[d.to as keyof DoubleProperty]];
         if (!this.feedAnimal(animal, prop.property)) {
@@ -351,8 +372,6 @@ export class ContainerComponent implements OnInit {
         prop = props.find(p => p[d.from as keyof DoubleProperty] === animal.index);
       }
     });
-    this.foodSelected = false;
-    this.sessionFacade.feedAnimal(this.myPlayer, this.session);
   }
 
   feedAnimal(animal: Animal, prop: CardTypes): boolean {
@@ -495,6 +514,7 @@ export class ContainerComponent implements OnInit {
         properties: [],
         requiredFood: 1,
         fat: 0,
+        piracyUsed: false,
         attacked: false
       };
       this.myPlayer.properties.forEach(p => {
@@ -515,6 +535,7 @@ export class ContainerComponent implements OnInit {
   }
 
   endPhase(): void {
+    this.cancelSelectedProperty();
     this.sessionFacade.endPhase(this.myPlayer, this.session);
   }
 
@@ -536,6 +557,10 @@ export class ContainerComponent implements OnInit {
       switchMap(() => this.sessionFacade.selectCurrentSession$),
       filter((s): s is EvolutionSessionEntity => !!s),
       tap((s) => {
+        if (this.session?.currentPlayer !== s.currentPlayer || this.session.phase !== s.phase) {
+          const audio = new Audio('assets/next_turn.mp3');
+          audio.play();
+        }
         this.session = JSON.parse(JSON.stringify(s));
         const players = this.session.players;
         this.myPlayer = players[this.user.id];

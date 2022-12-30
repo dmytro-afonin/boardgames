@@ -23,7 +23,6 @@
       Join the game
     </button>
   </div>
-
   <ng-container *ngIf='session.started && !session.finished'>
     <div class='flex'>
       <div>
@@ -53,7 +52,12 @@
       <button mat-button (click)="accordion.closeAll()">Collapse All</button>
     </div>
     <mat-accordion #accordion=matAccordion multi>
-      <mat-expansion-panel *ngFor='let player of players' [expanded]='true' class='bg-lime-50'>
+      <mat-expansion-panel
+        *ngFor='let player of players'
+        [expanded]='true'
+        [class.bg-green-100]='player.id === session.currentPlayer'
+        [class.bg-lime-50]='player.id !== session.currentPlayer'
+      >
 
         <mat-expansion-panel-header *ngIf='player.id === myPlayer.id'>
           <mat-panel-title>
@@ -100,7 +104,8 @@
             <feature-animal
               *ngFor="let card of myPlayer.animals"
               [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
-              class='card mr-3 last:mr-0'
+              [class.border-4]='myPlayer.attack?.animalIndex === card.index'
+              class='card mr-3 last:mr-0 border-red-500 rounded-3xl'
               cdkDrag
               [cdkDragData]='card'
               (click)='actionAnimal(card)'
@@ -111,12 +116,18 @@
                   <mat-icon>eco</mat-icon>
                   <span class='mr-3'>{{card.food}}/{{card.requiredFood}}</span>
                 </ng-container>
-                <span>Animal</span>
+                <span *ngIf='session.phase === 0'>Animal</span>
                 <span *ngIf='card.poisoned'>
                   <mat-icon>sentiment_very_dissatisfied</mat-icon>
                 </span>
-                <span *ngIf='card.fat' class='text-amber-300 font-bold'>
-                  <mat-icon>water_drop</mat-icon><span class='ml-3'>{{card.fat}}</span>
+                <span *ngIf='card.hibernation && session.phase === 1'>
+                  <mat-icon>bedtime</mat-icon>
+                </span>
+                <span *ngIf='card.hibernationCooldown && session.phase === 1'>
+                  <mat-icon>bedtime_off</mat-icon>
+                </span>
+                <span *ngIf='card.fat' class='text-amber-300 flex items-center font-bold'>
+                  <mat-icon>water_drop</mat-icon><span>{{card.fat}}</span>
                 </span>
               </div>
               <ng-container *ngFor='let property of myPlayer.properties'>
@@ -214,7 +225,7 @@
             class='mr-3 last:mr-0'
             [class.cursor-pointer]='card.canBeActioned'
             *ngFor="let card of player.animals"
-            [actioned]='card.canBeActioned'
+            [actioned]='card.canBeActioned || (myPlayer.attack?.player === player.id && myPlayer.attack?.carnivorous === card.index)'
             (click)='actionEnemyAnimal(card, player)'
           >
             <div class='head uppercase text-center flex w-full justify-center'>
@@ -222,12 +233,18 @@
                 <mat-icon>eco</mat-icon>
                 <span class='mr-3'>{{card.food}}/{{card.requiredFood}}</span>
               </ng-container>
-              <span>Animal</span>
+              <span *ngIf='session.phase === 0'>Animal</span>
               <span *ngIf='card.poisoned'>
                 <mat-icon>sentiment_very_dissatisfied</mat-icon>
               </span>
-              <span *ngIf='card.fat' class='text-amber-300 font-bold'>
-                  <mat-icon>water_drop</mat-icon><span class='ml-3'>{{card.fat}}</span>
+              <span *ngIf='card.hibernation && session.phase === 1'>
+                <mat-icon>bedtime</mat-icon>
+              </span>
+              <span *ngIf='card.hibernationCooldown && session.phase === 1'>
+                <mat-icon>bedtime_off</mat-icon>
+              </span>
+              <span *ngIf='card.fat' class='text-amber-300 flex items-center font-bold'>
+                <mat-icon>water_drop</mat-icon><span>{{card.fat}}</span>
               </span>
             </div>
             <ng-container *ngFor='let property of player.properties'>

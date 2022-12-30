@@ -72,6 +72,7 @@ export interface Animal {
   requiredFood: number;
   fat: number;
   attacked: boolean;
+  piracyUsed: boolean;
   poisoned?: boolean;
   hibernation?: boolean;
   hibernationCooldown?: number;
@@ -89,7 +90,7 @@ export interface Player {
   properties: DoubleProperty[];
   endPhase: boolean;
   attack: Attack | null;
-  score: 0;
+  score: number;
 }
 export interface Attack {
 

@@ -11,7 +11,7 @@ import {
   EvolutionSessionEntity,
   HandCard,
   Phase,
-  Player
+  Player, WEIGHT_PROPERTY_MAP
 } from './evolution-session.models';
 
 @Injectable()
@@ -196,6 +196,7 @@ export class EvolutionSessionFacade {
     if (!session.cards.length) {
       // todo calc score
       return {
+        ...this.#updateCards(session),
         ...session,
         finished: true,
         currentPlayer: ''
@@ -260,12 +261,16 @@ export class EvolutionSessionFacade {
 
   #updatePlayerAnimals(players: Player[]): Player[] {
     return players.map(p => {
-      const animals = this.#killHungryAnimals(p.animals);
-      const properties = this.#removeBrokenProperties(animals, p.properties);
+      const player = this.#killHungryAnimals(p);
+      const score: number = player.properties.length + player.animals.reduce((sum, cur) => {
+        return sum + 2 + cur.properties.reduce((s, p) => {
+          return s + WEIGHT_PROPERTY_MAP[p] + 1;
+        }, 0);
+      }, 0);
+
       return {
-        ...p,
-        animals,
-        properties
+        ...player,
+        score
       }
     });
   }
@@ -274,21 +279,36 @@ export class EvolutionSessionFacade {
     return properties.filter(p => animals.find(a => p.animal1 === a.index) && animals.find(a => p.animal2 === a.index))
   }
 
-  #killHungryAnimals(animals: Animal[]): Animal[] {
-    return animals
-      .filter((a) => {
-        if (a.poisoned) {
-          return false;
-        }
-        if (a.hibernation) {
-          return true;
-        }
-        return a.food >= a.requiredFood;
-      })
-      .map((a, i) => {
-        const hibernationCooldown = this.#getHibernationCooldown(a);
-        return {...a, index: i, food: 0, hibernation: false, hibernationCooldown, attacked: false}
-      });
+  #killHungryAnimals(player: Player): Player {
+    const animals: Animal[] = [];
+    for (const animal of player.animals) {
+      if (this.#shouldDie(animal)) {
+        player.properties = player.properties.filter(p => p.animal1 !== animal.index && p.animal2 !== animal.index);
+        player.properties.forEach(p => {
+          if (p.animal1 > animal.index) {
+            p.animal1--;
+            p.animal2--;
+          }
+        });
+      } else {
+        animals.push(animal);
+      }
+    }
+    player.animals = animals.map((a, i) => {
+      const hibernationCooldown = this.#getHibernationCooldown(a);
+      return {...a, index: i, food: 0, hibernation: false, hibernationCooldown, attacked: false, piracyUsed: false}
+    });
+    return player;
+  }
+
+  #shouldDie(a: Animal): boolean {
+    if (a.poisoned) {
+      return true;
+    }
+    if (a.hibernation) {
+      return false;
+    }
+    return a.food < a.requiredFood;
   }
 
   #getHibernationCooldown(a: Animal): number {
