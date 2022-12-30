@@ -1,7 +1,7 @@
 {
   "hosting": {
-    "target": "conflict",
-    "public": "dist/apps/conflict",
+    "target": "evolution",
+    "public": "dist/apps/evolution",
     "ignore": [
       "**/.*"
     ],

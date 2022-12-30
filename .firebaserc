@@ -2,7 +2,7 @@
   "targets": {
     "conflict-30f20": {
       "hosting": {
-        "conflict": [
+        "evolution": [
           "conflict-30f20"
         ]
       }

@@ -79,6 +79,18 @@ export class ContainerComponent implements OnInit {
         this.handleFeedAnimal(carnivorous);
         const propIndex = animal.properties.findIndex(a => a === prop);
         animal.properties.splice(propIndex, 1);
+        switch (prop) {
+          case CardTypes.FAT_TISSUE:
+            if (animal.fat > animal.properties.filter(p => p === CardTypes.FAT_TISSUE).length) {
+              animal.fat--;
+            }
+            break;
+          case CardTypes.HIBERNATION_ABILITY:
+            if (animal.hibernation) {
+              animal.hibernation = false;
+            }
+            break;
+        }
         this.sessionFacade.respondAttack(this.myPlayer, this.session);
         return;
       }
@@ -230,6 +242,9 @@ export class ContainerComponent implements OnInit {
         this.handleFeedAnimal(this.myPlayer.animals[this.selectedAnimalIndex as number]);
         this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
         break;
+      case CardTypes.FAT_TISSUE:
+        this.handleFatTissue(animal, player);
+        break;
       case CardTypes.CARNIVOROUS:
         this.handleCarnivorousAttack(animal, player);
         break;
@@ -238,15 +253,18 @@ export class ContainerComponent implements OnInit {
     }
     this.cancelSelectedProperty();
   }
+  handleFatTissue(animal: Animal, player: Player): void {
+    if ((animal.food < animal.requiredFood) && animal.fat) {
+      animal.food++;
+      animal.fat--;
+      this.sessionFacade.updateSessionFood(player, this.session);
+    }
+  }
   becameMimicryTarget(animal: Animal): void {
     if (this.myPlayer.attack && animal.index !== this.selectedAnimalIndex) {
+      this.selectedAnimalIndex = animal.index;
       this.myPlayer.attack.animalIndex = animal.index;
       this.cancelSelectedProperty();
-      // const attack: Attack = this.myPlayer.attack as Attack;
-      // const attacker: Player = this.session.players[attack.player];
-      // const carnivorous = attacker.animals[attack.carnivorous];
-      // this.eatAnimal(carnivorous, animal, player, attacker);
-      // this.sessionFacade.respondAttack(this.myPlayer, this.session);
     }
   }
   handleCarnivorousAttack(animal: Animal, player: Player): void {

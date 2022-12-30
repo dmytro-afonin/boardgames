@@ -26,8 +26,8 @@
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "500kb",
-              "maximumError": "1mb"
+              "maximumWarning": "1mb",
+              "maximumError": "2mb"
             },
             {
               "type": "anyComponentStyle",
@@ -82,6 +82,16 @@
       "options": {
         "jestConfig": "apps/evolution/jest.config.ts",
         "passWithNoTests": true
+      }
+    },
+    "deploy": {
+      "executor": "@angular/fire:deploy",
+      "options": {
+        "prerender": false,
+        "ssr": false,
+        "browserTarget": "evolution:build:production",
+        "firebaseProject": "conflict-30f20",
+        "firebaseHostingSite": "conflict-30f20"
       }
     }
   },
