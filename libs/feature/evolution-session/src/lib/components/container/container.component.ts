@@ -26,13 +26,14 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 export class ContainerComponent implements OnInit {
   session!: EvolutionSessionEntity;
   user!: User;
-  players!: Player[];
+  players: Player[] = [];
   myPlayer!: Player;
   selectedProperty!: CardTypes | null;
   selectedAnimalIndex!: number | null;
   foodSelected!: boolean;
   joinGameForm: FormGroup = this.fb.nonNullable.group({
-    name: new FormControl<string>('', [Validators.minLength(3), Validators.required])
+    name: new FormControl<string>('', [Validators.minLength(3), Validators.required]),
+    doubleCards: new FormControl<boolean>(false)
   });
 
   constructor(
@@ -45,7 +46,8 @@ export class ContainerComponent implements OnInit {
 
   startSession(): void {
     const name = this.joinGameForm.value.name;
-    this.sessionFacade.startSession({...this.user, name}, this.session);
+    const double = this.joinGameForm.value.doubleCards;
+    this.sessionFacade.startSession({...this.user, name}, this.session, {double});
   }
   joinGame(): void {
     const name = this.joinGameForm.value.name;
@@ -472,9 +474,6 @@ export class ContainerComponent implements OnInit {
     this.selectedProperty = card.type1;
     this.selectedAnimalIndex = index;
 
-    console.log(this.selectedProperty);
-    console.log(this.selectedAnimalIndex);
-
     this.players.forEach(player => {
       player.animals.forEach(animal => {
         animal.canBeActioned = this.#canAddPropertyToEnemyAnimal(card, animal);
@@ -573,7 +572,7 @@ export class ContainerComponent implements OnInit {
         const players = this.session.players;
         this.myPlayer = players[this.user.id];
         if (!this.session.started && !this.joinGameForm.value.name) {
-          this.joinGameForm.setValue({name: this.user.name});
+          this.joinGameForm.get('name')?.setValue(this.user.name);
         }
         if (this.session.finished) {
           this.players = Object.values(players).sort((a,b) => a.score < b.score ? 1 : -1);

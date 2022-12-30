@@ -80,6 +80,10 @@ export interface Animal {
   properties: CardTypes[]
 }
 
+export interface GameOptions {
+  double: boolean;
+}
+
 export interface Player {
   order: number;
   id: string;

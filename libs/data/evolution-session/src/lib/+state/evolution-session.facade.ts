@@ -8,7 +8,7 @@ import {
   CARDS_BASE_SCHEME,
   CardSchemeItem,
   DoubleProperty,
-  EvolutionSessionEntity,
+  EvolutionSessionEntity, GameOptions,
   HandCard,
   Phase,
   Player, WEIGHT_PROPERTY_MAP
@@ -95,9 +95,9 @@ export class EvolutionSessionFacade {
 
     this.#processAction(player, session);
   }
-  startSession(user: User, evolutionSession: EvolutionSessionEntity): void {
+  startSession(user: User, evolutionSession: EvolutionSessionEntity, options: GameOptions): void {
     evolutionSession.players[user.id].name = user.name;
-
+    evolutionSession.cards = this.#createCardsFromSchema(options);
     const session: EvolutionSessionEntity = JSON.parse(JSON.stringify(evolutionSession));
     const playerIds: string[] = Object.keys(session.players);
     for (let i = 0; i < 6; i ++) {
@@ -124,14 +124,13 @@ export class EvolutionSessionFacade {
   }
 
   createSession(name: string, user: User): void {
-    const cards = this.#createCardsFromSchema();
 
     const player: Player = this.#createPlayer(user);
 
     const evolutionSession: Partial<EvolutionSessionEntity> = {
       host: user.id,
       name,
-      cards,
+      cards: [],
       currentPlayer: '',
       eat: 0,
       phase: Phase.GROWING,
@@ -379,9 +378,21 @@ export class EvolutionSessionFacade {
     };
   }
 
-  #createCardsFromSchema(): HandCard[] {
+  #createCardsFromGameOptions(options: GameOptions): CardSchemeItem[] {
+    const scheme: CardSchemeItem[] = this.#getBaseSchemeCards();
+    if (options.double) {
+      scheme.push(...this.#getBaseSchemeCards());
+    }
+    return scheme;
+  }
+
+  #getBaseSchemeCards(): CardSchemeItem[] {
+    return JSON.parse(JSON.stringify(this.#shuffle(CARDS_BASE_SCHEME)));
+  }
+
+  #createCardsFromSchema(options: GameOptions): HandCard[] {
     let cards: HandCard[] = [];
-    let scheme: CardSchemeItem[] = JSON.parse(JSON.stringify(this.#shuffle(CARDS_BASE_SCHEME)));
+    let scheme: CardSchemeItem[] = this.#createCardsFromGameOptions(options);
 
     while (scheme.length) {
       scheme = this.#shuffle(scheme);
