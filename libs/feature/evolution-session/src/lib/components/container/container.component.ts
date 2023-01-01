@@ -280,44 +280,39 @@ export class ContainerComponent implements OnInit {
   becameMimicryTarget(animal: Animal): void {
     if (this.myPlayer.attack && animal.index !== this.selectedAnimalIndex) {
       this.selectedAnimalIndex = animal.index;
-      if (this.#canBeEatenImmediately(animal)) {
-        const attacker = this.session.players[this.myPlayer.attack.player];
-        const carnivorous = attacker.animals[this.myPlayer.attack.carnivorous];
-        this.eatAnimal(carnivorous, animal, this.myPlayer, attacker);
-        this.sessionFacade.respondAttack(this.myPlayer, this.session);
-      } else {
+      const attacker = this.session.players[this.myPlayer.attack.player];
+      const carnivorous = attacker.animals[this.myPlayer.attack.carnivorous];
+      if (this.#cannotBeEaten(animal, this.myPlayer, carnivorous)) {
         this.myPlayer.attack.animalIndex = animal.index;
-        this.cancelSelectedProperty();
+      } else {
+        this.eatAnimal(carnivorous, animal, this.myPlayer, attacker);
       }
+      this.cancelSelectedProperty();
     }
   }
   handleCarnivorousAttack(animal: Animal, player: Player): void {
     const carnivorous = this.myPlayer.animals[this.selectedAnimalIndex as number];
-
-    if (this.#canBeEaten(animal, player)) {
-      this.eatAnimal(carnivorous, animal, player, this.myPlayer);
-      this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
-    } else {
+    if (this.#cannotBeEaten(animal, player, carnivorous)) {
       player.attack = {
         carnivorous: this.selectedAnimalIndex as number,
         player: this.myPlayer.id,
         animalIndex: animal.index
       };
+    } else {
       this.sessionFacade.createAttack(player, this.session);
+      this.eatAnimal(carnivorous, animal, player, this.myPlayer);
+      this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
     }
   }
 
-  #canBeEaten(animal: Animal, player: Player): boolean {
-    const carnivorous = this.myPlayer.animals[this.selectedAnimalIndex as number];
+  #cannotBeEaten(animal: Animal, player: Player, carnivorous: Animal): boolean {
+    const hasRunning = !!animal.properties.includes(CardTypes.RUNNING);
+    const hasTailLoss = !!animal.properties.includes(CardTypes.TAIL_LOSS);
+
     const hasMimicry = animal.properties.includes(CardTypes.MIMICRY);
     const hasMimicryTargets = this.getMimicryTarget(player, animal, carnivorous);
-    const mimicryWorks = hasMimicry && hasMimicryTargets;
-    return !this.#canBeEatenImmediately(animal) && !mimicryWorks;
-  }
-  #canBeEatenImmediately(animal: Animal): boolean {
-    const hasRunning = animal.properties.includes(CardTypes.RUNNING);
-    const hasTailLoss = animal.properties.includes(CardTypes.TAIL_LOSS);
-    return !hasRunning && !hasTailLoss;
+    const mimicryWorks = !!(hasMimicry && hasMimicryTargets);
+    return hasRunning || mimicryWorks || hasTailLoss;
   }
 
   getMimicryTarget(player: Player, animal: Animal, carnivorous: Animal): Animal | undefined {
@@ -331,7 +326,7 @@ export class ContainerComponent implements OnInit {
     const notMimicry = !animal.properties.includes(CardTypes.MIMICRY);
     return notCurrent && canAttack && notMimicry;
   }
-  eatAnimal(carnivorous: Animal, animal: Animal, player: Player, attacker: Player): void {
+  eatAnimal(carnivorous: Animal, animal: Animal, player: Player, attaker: Player): void {
     this.handleFeedAnimal(carnivorous);
     if (this.canEat(carnivorous)) {
       this.handleFeedAnimal(carnivorous);
@@ -349,7 +344,7 @@ export class ContainerComponent implements OnInit {
         p.animal2--;
       }
     });
-    const myScavenger = attacker.animals.find(a => a.properties.includes(CardTypes.SCAVENGER) && this.canEat(a));
+    const myScavenger = attaker.animals.find(a => a.properties.includes(CardTypes.SCAVENGER) && this.canEat(a));
     if (myScavenger) {
       this.handleFeedAnimal(myScavenger);
     } else {
@@ -362,7 +357,7 @@ export class ContainerComponent implements OnInit {
       }
     }
 
-    this.handleCommunications(carnivorous, attacker,[CardTypes.COMMUNICATION]);
+    this.handleCommunications(carnivorous, this.myPlayer,[CardTypes.COMMUNICATION]);
   }
 
   foodSelectedAntionFoodPhase(animal: Animal): void {

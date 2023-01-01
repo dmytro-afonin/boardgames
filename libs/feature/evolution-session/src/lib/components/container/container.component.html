@@ -116,12 +116,12 @@
             <feature-animal
               *ngFor="let card of myPlayer.animals"
               [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
-              [class.border-4]='player.attack?.animalIndex === card.index'
+              [class.border-4]='myPlayer.attack?.animalIndex === card.index'
               class='card mr-3 last:mr-0 border-red-500 rounded-3xl'
               cdkDrag
               [cdkDragData]='card'
               (click)='actionAnimal(card)'
-              [actioned]='card.canBeActioned || player.attack?.animalIndex === card.index'
+              [actioned]='card.canBeActioned || myPlayer.attack?.animalIndex === card.index'
             >
               <div class='head uppercase text-center flex w-full justify-center'>
                 <ng-container *ngIf='session.phase === 1'>
