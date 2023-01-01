@@ -298,8 +298,8 @@ export class ContainerComponent implements OnInit {
         player: this.myPlayer.id,
         animalIndex: animal.index
       };
-    } else {
       this.sessionFacade.createAttack(player, this.session);
+    } else {
       this.eatAnimal(carnivorous, animal, player, this.myPlayer);
       this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
     }
