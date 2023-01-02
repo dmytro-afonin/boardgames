@@ -389,7 +389,7 @@ export class GameComponent implements OnChanges {
       time: Date.now(),
       action: `${this.myPlayer.name} stole 1 food from ${player.name}`
     });
-    this.handleCommunications(pirate, this.myPlayer,[CardTypes.COMMUNICATION]);
+    this.handleCommunications(pirate, this.myPlayer,[CardTypes.COOPERATION]);
     this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
   }
 
@@ -445,6 +445,7 @@ export class GameComponent implements OnChanges {
 
     if (this.selectedProperty === CardTypes.TAIL_LOSS) {
       this.useTailLoss(animal, prop);
+      this.cancelSelectedProperty();
       return;
     }
 
@@ -499,11 +500,7 @@ export class GameComponent implements OnChanges {
       time: Date.now(),
       action: `${this.myPlayer.name} uses tail loss to drop ${UI_PROPERTY_MAP[prop].title}`
     });
-    const attacker = this.session.players[this.session.attack.carnivorous.player];
-    const carnivorous = attacker.animals[this.session.attack.carnivorous.animal];
-    carnivorous.attacked = true;
-    this.handleFeedAnimal(carnivorous);
-    this.handleCommunications(carnivorous, attacker, [CardTypes.COMMUNICATION]);
+
     const propIndex = animal.properties.findIndex(a => a === prop);
     animal.properties.splice(propIndex, 1);
     switch (prop) {
@@ -517,10 +514,20 @@ export class GameComponent implements OnChanges {
           animal.hibernation = false;
         }
         break;
-      case CardTypes.PARASITE:
-        animal.requiredFood -= 2
+      case CardTypes.PARASITE: {
+        animal.requiredFood -= 2;
+        if (animal.food > animal.requiredFood) {
+          animal.food = animal.requiredFood;
+        }
+      }
         break;
     }
+
+    const attacker = this.session.players[this.session.attack.carnivorous.player];
+    const carnivorous = attacker.animals[this.session.attack.carnivorous.animal];
+    carnivorous.attacked = true;
+    this.handleFeedAnimal(carnivorous);
+    this.handleCommunications(carnivorous, attacker, [CardTypes.COOPERATION]);
     this.sessionFacade.respondAttack(this.myPlayer, this.session);
   }
 
@@ -632,7 +639,7 @@ export class GameComponent implements OnChanges {
 
     this.#feedScavenger(attaker);
 
-    this.handleCommunications(carnivorous, this.myPlayer,[CardTypes.COMMUNICATION]);
+    this.handleCommunications(carnivorous, this.myPlayer,[CardTypes.COOPERATION]);
   }
 
   /* ------------------ AFTER EAT ------------------ */
@@ -650,7 +657,7 @@ export class GameComponent implements OnChanges {
           time: Date.now(),
           action: `${player.name}'s scavenger received 1 food`
         });
-        this.handleCommunications(scavenger, player, [CardTypes.COMMUNICATION]);
+        this.handleCommunications(scavenger, player, [CardTypes.COOPERATION]);
         return;
       }
     }
@@ -678,14 +685,14 @@ export class GameComponent implements OnChanges {
   }
 
   applyCommunication(animal: Animal, prop: CardTypes): boolean {
-    const isCooperation = prop === CardTypes.COOPERATION;
-    if (isCooperation && !this.session.eat) {
+    const isCommunication = prop === CardTypes.COMMUNICATION;
+    if (isCommunication && !this.session.eat) {
       return false;
     }
 
     if (this.canEat(animal)) {
       this.handleFeedAnimal(animal);
-      if (isCooperation) {
+      if (isCommunication) {
         this.session.eat--;
       }
       return true;
