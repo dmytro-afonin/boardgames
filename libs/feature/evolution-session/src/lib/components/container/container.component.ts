@@ -306,8 +306,8 @@ export class ContainerComponent implements OnInit {
   }
 
   #cannotBeEaten(animal: Animal, player: Player, carnivorous: Animal): boolean {
-    const hasRunning = !!animal.properties.includes(CardTypes.RUNNING);
-    const hasTailLoss = !!animal.properties.includes(CardTypes.TAIL_LOSS);
+    const hasRunning = animal.properties.includes(CardTypes.RUNNING);
+    const hasTailLoss = animal.properties.includes(CardTypes.TAIL_LOSS);
 
     const hasMimicry = animal.properties.includes(CardTypes.MIMICRY);
     const hasMimicryTargets = this.getMimicryTarget(player, animal, carnivorous);
@@ -344,20 +344,24 @@ export class ContainerComponent implements OnInit {
         p.animal2--;
       }
     });
-    const myScavenger = attaker.animals.find(a => a.properties.includes(CardTypes.SCAVENGER) && this.canEat(a));
-    if (myScavenger) {
-      this.handleFeedAnimal(myScavenger);
-    } else {
-      // todo find next player from current one and so on (like in facade)
-      for (const player of this.players) {
-        const scavenger = player.animals.find(a => a.properties.includes(CardTypes.SCAVENGER) && this.canEat(a));
-        if (scavenger) {
-          this.handleFeedAnimal(scavenger);
-        }
-      }
-    }
+
+    this.#handleScavenger(attaker);
 
     this.handleCommunications(carnivorous, this.myPlayer,[CardTypes.COMMUNICATION]);
+  }
+
+  #handleScavenger(attacker: Player): void {
+    const players = [...this.players];
+    while(players[0].id !== attacker.id) {
+      players.push(players.shift() as Player);
+    }
+    for (const player of players) {
+      const scavenger = player.animals.find(a => a.properties.includes(CardTypes.SCAVENGER) && this.canEat(a));
+      if (scavenger) {
+        this.handleFeedAnimal(scavenger);
+        return;
+      }
+    }
   }
 
   foodSelectedAntionFoodPhase(animal: Animal): void {
