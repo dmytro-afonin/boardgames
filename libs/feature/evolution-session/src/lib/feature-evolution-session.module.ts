@@ -20,6 +20,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { LobbyComponent } from './components/lobby/lobby.component';
 import { ScoreComponent } from './components/score/score.component';
 import { GameComponent } from './components/game/game.component';
+import { AnimalStatusComponent } from './components/animal-status/animal-status.component';
+import { AnimalCommunicationsComponent } from './components/animal-communications/animal-communications.component';
 
 const routes: Routes = [
   {
@@ -54,7 +56,9 @@ const routes: Routes = [
     PropertyComponent,
     LobbyComponent,
     ScoreComponent,
-    GameComponent
+    GameComponent,
+    AnimalStatusComponent,
+    AnimalCommunicationsComponent
   ],
 })
 export class FeatureEvolutionSessionModule {}

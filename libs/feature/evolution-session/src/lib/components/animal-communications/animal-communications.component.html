@@ -1,0 +1,22 @@
+<div class='flex w-full relative'>
+  <div class='flex-1'>
+    <ng-container *ngFor='let property of player.properties'>
+      <div *ngIf='property.animal2 === animal.index' class='h-7'></div>
+    </ng-container>
+  </div>
+
+  <div class='flex-1'>
+    <ng-container *ngFor='let property of player.properties'>
+      <div
+        *ngIf='property.animal1 === animal.index'
+        class='h-7'>
+        <feature-property
+          *ngIf='property.animal1 === animal.index'
+          class='absolute w-full left-28'
+          [type]='property.property'
+        >
+        </feature-property>
+      </div>
+    </ng-container>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+<div class='head uppercase text-center flex w-full justify-center'>
+  <ng-container *ngIf='session.phase === 1'>
+    <mat-icon>eco</mat-icon>
+
+    <span class='mr-3'>
+      {{animal.food}}/{{animal.requiredFood}}
+    </span>
+  </ng-container>
+
+  <span *ngIf='session.phase === 0'>Animal</span>
+
+  <span *ngIf='animal.poisoned'>
+    <mat-icon>sentiment_very_dissatisfied</mat-icon>
+  </span>
+
+  <span *ngIf='animal.hibernation'>
+    <mat-icon>bedtime</mat-icon>
+  </span>
+
+  <span *ngIf='animal.hibernationCooldown'>
+    <mat-icon>bedtime_off</mat-icon>
+  </span>
+
+  <span *ngIf='animal.fat' class='text-amber-300 flex items-center font-bold'>
+    <mat-icon>water_drop</mat-icon><span>{{animal.fat}}</span>
+  </span>
+</div>

@@ -32,35 +32,41 @@
     [class.bg-green-100]='player.id === session.currentPlayer'
     [class.bg-lime-50]='player.id !== session.currentPlayer'
   >
-
-    <mat-expansion-panel-header *ngIf='player.id === myPlayer.id'>
+    <mat-expansion-panel-header>
       <mat-panel-title>
         <span class='text-lg font-bold mr-3'>{{player.order + 1}}</span>
-        <img class='rounded-full w-9 mr-3' *ngIf='myPlayer.imageUrl' [src]='myPlayer.imageUrl' alt='{{myPlayer.name}}' />
-        {{ myPlayer.name }}
+        <img class='rounded-full w-9 mr-3' *ngIf='player.imageUrl' [src]='player.imageUrl' alt='{{player.name}}' />
+        {{ player.name }}
       </mat-panel-title>
 
       <mat-panel-description>
         <div class='flex w-full'>
           <div class='flex-grow'>
-                <span
-                  class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
-                  *ngIf='player.id === session.currentPlayer'
-                >
-                  Current Turn
-                </span>
+            <span
+              class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
+              *ngIf='player.id === session.currentPlayer'
+            >
+              Current Turn
+            </span>
 
             <span
               class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
               *ngIf='player.id === session.firstPlayer'
             >
-                  First Turn
-                </span>
-            <span class='bg-green-900 rounded-full text-lime-50 py-1 px-3' *ngIf='player.endPhase'>Finished</span>
+              First Turn
+            </span>
+
+            <span
+              class='bg-green-900 rounded-full text-lime-50 py-1 px-3'
+              *ngIf='player.endPhase'
+            >
+              Finished
+            </span>
           </div>
+
           <button
             class='bg-green-900 rounded-full text-white flex items-center p-1 pr-2'
-            *ngIf='session.currentPlayer === myPlayer.id && !myPlayer.attack'
+            *ngIf='player.id === myPlayer.id && session.currentPlayer === myPlayer.id && !myPlayer.attack'
             (click)="endPhase()"
           >
             <mat-icon>next_plan</mat-icon>
@@ -77,62 +83,31 @@
         class='list flex items-stretch border-dashed border-green-900 rounded-3xl p-3'
         [class.border-2]='session.currentPlayer === myPlayer.id'
         cdkDropListOrientation="horizontal"
-        [cdkDropListSortPredicate]='sortMyAnimals'
+        [cdkDropListSortPredicate]='preventPlayAnimalBetweenCommunications'
         [cdkDropListData]="myPlayer.animals"
         [cdkDropListDisabled]='true'
         (cdkDropListDropped)="animalDropped($event)"
       >
         <feature-animal
           *ngFor="let card of myPlayer.animals"
-          [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
-          [class.border-4]='myPlayer.attack?.animalIndex === card.index'
           class='card mr-3 last:mr-0 border-red-500 rounded-3xl'
+          [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
+          [class.cursor-pointer]='card.canBeActioned'
+          [class.border-4]='myPlayer.attack?.animalIndex === card.index'
           cdkDrag
           [cdkDragData]='card'
-          (click)='actionAnimal(card)'
           [actioned]='card.canBeActioned || myPlayer.attack?.animalIndex === card.index'
+          (click)='actionAnimal(card)'
         >
-          <div class='head uppercase text-center flex w-full justify-center'>
-            <ng-container *ngIf='session.phase === 1'>
-              <mat-icon>eco</mat-icon>
-              <span class='mr-3'>{{card.food}}/{{card.requiredFood}}</span>
-            </ng-container>
-            <span *ngIf='session.phase === 0'>Animal</span>
-            <span *ngIf='card.poisoned'>
-                  <mat-icon>sentiment_very_dissatisfied</mat-icon>
-                </span>
-            <span *ngIf='card.hibernation && session.phase === 1'>
-                  <mat-icon>bedtime</mat-icon>
-                </span>
-            <span *ngIf='card.hibernationCooldown && session.phase === 1'>
-                  <mat-icon>bedtime_off</mat-icon>
-                </span>
-            <span *ngIf='card.fat' class='text-amber-300 flex items-center font-bold'>
-                  <mat-icon>water_drop</mat-icon><span>{{card.fat}}</span>
-                </span>
-          </div>
-          <div class='flex w-full relative'>
-            <div class='flex-1'>
-              <ng-container *ngFor='let property of myPlayer.properties'>
-                <div *ngIf='property.animal2 === card.index' class='h-7'></div>
-              </ng-container>
-            </div>
+          <feature-animal-status
+            [session]='session'
+            [animal]='card'
+          ></feature-animal-status>
 
-            <div class='flex-1'>
-              <ng-container *ngFor='let property of myPlayer.properties'>
-                <div
-                  *ngIf='property.animal1 === card.index'
-                  class='h-7'>
-                  <feature-property
-                    *ngIf='property.animal1 === card.index'
-                    class='absolute w-full left-28'
-                    [type]='property.property'
-                  >
-                  </feature-property>
-                </div>
-              </ng-container>
-            </div>
-          </div>
+          <feature-animal-communications
+            [player]='player'
+            [animal]='card'
+          ></feature-animal-communications>
 
           <div class='pb-3'>
             <div class='border-4'
@@ -158,7 +133,7 @@
         cdkDropListOrientation="horizontal"
         [cdkDropListAutoScrollStep]='6'
         [cdkDropListDisabled]='session.currentPlayer !== myPlayer.id || session.phase === 1'
-        (cdkDropListDropped)="handDrop($event)"
+        (cdkDropListDropped)="sortAnimalsInHand($event)"
         [cdkDropListConnectedTo]="[myDeck]"
       >
         <feature-animal
@@ -186,81 +161,25 @@
       </div>
     </ng-container>
 
-    <mat-expansion-panel-header *ngIf='player.id !== myPlayer.id'>
-      <mat-panel-title>
-        <span class='text-lg font-bold mr-3'>{{player.order + 1}}</span>
-        <img class='rounded-full w-9 mr-3' *ngIf='player.imageUrl' [src]='player.imageUrl' alt='{{player.name}}' />
-        {{ player.name }}
-      </mat-panel-title>
-
-      <mat-panel-description>
-            <span
-              class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
-              *ngIf='player.id === session.currentPlayer'
-            >
-              Current Turn
-            </span>
-
-        <span
-          class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
-          *ngIf='player.id === session.firstPlayer'
-        >
-              First Turn
-            </span>
-        <span class='bg-green-900 rounded-full text-lime-50 py-1 px-3' *ngIf='player.endPhase'>Finished</span>
-      </mat-panel-description>
-    </mat-expansion-panel-header>
-
     <div class='list flex items-stretch p-3' *ngIf='player.id !== myPlayer.id'>
       <feature-animal
-        class='mr-3 last:mr-0'
-        [class.cursor-pointer]='card.canBeActioned'
         *ngFor="let card of player.animals"
+        class='mr-3 last:mr-0 border-red-500 rounded-3xl'
+        [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
+        [class.cursor-pointer]='card.canBeActioned'
+        [class.border-4]='myPlayer.attack?.animalIndex === card.index'
         [actioned]='card.canBeActioned || (myPlayer.attack?.player === player.id && myPlayer.attack?.carnivorous === card.index)'
         (click)='actionEnemyAnimal(card, player)'
       >
-        <div class='head uppercase text-center flex w-full justify-center'>
-          <ng-container *ngIf='session.phase === 1'>
-            <mat-icon>eco</mat-icon>
-            <span class='mr-3'>{{card.food}}/{{card.requiredFood}}</span>
-          </ng-container>
-          <span *ngIf='session.phase === 0'>Animal</span>
-          <span *ngIf='card.poisoned'>
-                <mat-icon>sentiment_very_dissatisfied</mat-icon>
-              </span>
-          <span *ngIf='card.hibernation && session.phase === 1'>
-                <mat-icon>bedtime</mat-icon>
-              </span>
-          <span *ngIf='card.hibernationCooldown && session.phase === 1'>
-                <mat-icon>bedtime_off</mat-icon>
-              </span>
-          <span *ngIf='card.fat' class='text-amber-300 flex items-center font-bold'>
-                <mat-icon>water_drop</mat-icon><span>{{card.fat}}</span>
-              </span>
-        </div>
+        <feature-animal-status
+          [session]='session'
+          [animal]='card'
+        ></feature-animal-status>
 
-        <div class='flex w-full relative'>
-          <div class='flex-1'>
-            <ng-container *ngFor='let property of player.properties'>
-              <div *ngIf='property.animal2 === card.index' class='h-7'></div>
-            </ng-container>
-          </div>
-
-          <div class='flex-1'>
-            <ng-container *ngFor='let property of player.properties'>
-              <div
-                *ngIf='property.animal1 === card.index'
-                class='h-7'>
-                <feature-property
-                  *ngIf='property.animal1 === card.index'
-                  class='absolute w-full left-28'
-                  [type]='property.property'
-                >
-                </feature-property>
-              </div>
-            </ng-container>
-          </div>
-        </div>
+        <feature-animal-communications
+          [player]='player'
+          [animal]='card'
+        ></feature-animal-communications>
 
         <div class='pb-3'>
           <feature-property
