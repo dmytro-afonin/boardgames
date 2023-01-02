@@ -353,10 +353,24 @@ export class EvolutionSessionFacade {
 
   #getFood(players: number): number {
     switch (players) {
-      case 2: return this.getDiceNumber() + 2;
-      case 3: return this.getDiceNumber() + this.getDiceNumber();
-      default: return this.getDiceNumber() + this.getDiceNumber() + 2;
+      case 2: return this.#rollDices(1, 2);
+      case 3: return this.#rollDices(2);
+      case 4: return this.#rollDices(2, 2);
+      case 5: return this.#rollDices(3, 2);
+      case 6: return this.#rollDices(3, 4);
+      case 7: return this.#rollDices(4, 2);
+      case 8:
+      default:
+        return this.#rollDices(4, 4);
     }
+  }
+
+  #rollDices(dices: number, supplement: number = 0): number {
+    let sum = supplement;
+    for (let i = 0; i < dices; i++) {
+      sum += this.getDiceNumber();
+    }
+    return sum;
   }
 
   getDiceNumber(): number {
