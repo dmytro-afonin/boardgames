@@ -1,0 +1,18 @@
+<div class='flex items-center justify-center'>
+  <div class='rounded-3xl w-96 overflow-hidden border-2'>
+    <div
+      *ngFor='let player of players; let i = index'
+      class='text-xl font-bold flex items-center text-white py-2 px-4'
+      [class.bg-amber-400]='i===0'
+      [class.bg-slate-400]='i===1'
+      [class.bg-amber-700]='i===2'
+      [class.bg-lime-50]='i > 2'
+      [class.text-green-900]='i > 2'
+    >
+      <span class='mr-3'>{{i+1}}</span>
+      <img class='rounded-full w-9 mr-3' *ngIf='player.imageUrl' [src]='player.imageUrl' alt='{{player.name}}' />
+      <span class='flex-grow'>{{player.name}}</span>
+      <span class='text-2xl'>{{player.score}}</span>
+    </div>
+  </div>
+</div>

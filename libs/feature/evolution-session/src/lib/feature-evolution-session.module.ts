@@ -17,6 +17,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { LobbyComponent } from './components/lobby/lobby.component';
+import { ScoreComponent } from './components/score/score.component';
+import { GameComponent } from './components/game/game.component';
 
 const routes: Routes = [
   {
@@ -45,6 +48,13 @@ const routes: Routes = [
     MatInputModule,
     MatCheckboxModule
   ],
-  declarations: [ContainerComponent, AnimalComponent, PropertyComponent],
+  declarations: [
+    ContainerComponent,
+    AnimalComponent,
+    PropertyComponent,
+    LobbyComponent,
+    ScoreComponent,
+    GameComponent
+  ],
 })
 export class FeatureEvolutionSessionModule {}

@@ -1,0 +1,28 @@
+<form [formGroup]='joinGameForm' *ngIf='!session.started' class='flex flex-col w-96'>
+
+  <mat-form-field *ngIf='!myPlayer || session.host === user?.id'>
+    <mat-label>Your Nickname</mat-label>
+    <input matInput placeholder="Player name" formControlName='name'>
+  </mat-form-field>
+
+  <mat-checkbox *ngIf='session.host === user?.id' formControlName='doubleCards'>
+    x2 cards (up to 8 players)
+  </mat-checkbox>
+
+  <button
+    class='rounded-full text-xl bg-green-900 text-white p-3'
+    *ngIf='session.host === user?.id && players.length > 1' (click)="startSession()"
+  >
+    <mat-icon>play_arrow</mat-icon>
+    Start Game
+  </button>
+
+  <button
+    *ngIf='!myPlayer'
+    class='rounded-full text-xl bg-green-900 text-white p-3'
+    [disabled]='!joinGameForm.valid'
+    (click)='joinGame()'
+  >
+    Join the game
+  </button>
+</form>
