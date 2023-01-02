@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, Input, ViewEncapsulation } from '@angular/core';
-import { EvolutionSessionEntity } from '@boardgames/data/evolution-session';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, ViewEncapsulation } from '@angular/core';
+import { EvolutionSessionEntity, Player } from '@boardgames/data/evolution-session';
 
 @Component({
   selector: 'feature-score',
@@ -7,7 +7,11 @@ import { EvolutionSessionEntity } from '@boardgames/data/evolution-session';
   encapsulation: ViewEncapsulation.Emulated,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ScoreComponent {
+export class ScoreComponent implements OnChanges {
   @Input() session!: EvolutionSessionEntity;
-  players = Object.values(this.session.players).sort((a,b) => a.score < b.score ? 1 : -1);
+  players: Player[] = [];
+
+  ngOnChanges(): void {
+    this.players = Object.values(this.session.players).sort((a,b) => a.score < b.score ? 1 : -1);
+  }
 }
