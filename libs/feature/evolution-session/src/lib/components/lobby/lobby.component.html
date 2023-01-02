@@ -1,28 +1,71 @@
-<form [formGroup]='joinGameForm' *ngIf='!session.started' class='flex flex-col w-96'>
+<form
+  class='flex flex-col items-center justify-center'
+  [formGroup]='joinGameForm'
+>
+  <div class='rounded-3xl border-2 border-green-900'>
 
-  <mat-form-field *ngIf='!myPlayer || session.host === user?.id'>
-    <mat-label>Your Nickname</mat-label>
-    <input matInput placeholder="Player name" formControlName='name'>
-  </mat-form-field>
+    <h1 class='text-xl font-bold text-green-900 p-3 border-b-2 border-green-900'>
+      <span *ngIf='session.host !== user?.id'>Wait fot the host to start session</span>
+      <span *ngIf='session.host === user?.id'>Players</span>
+    </h1>
+    <div class='p-3'>
+      <div
+        *ngFor='let player of players; let i = index'
+        class='p-3 border-b-2 border-green-900 last:border-0'
+      >
 
-  <mat-checkbox *ngIf='session.host === user?.id' formControlName='doubleCards'>
-    x2 cards (up to 8 players)
-  </mat-checkbox>
+        <div *ngIf='player.id !== user.id' class='flex items-center'>
+          <span class='text-lg font-bold mr-3'>{{i + 1}}</span>
+          <img class='rounded-full w-9 mr-3' *ngIf='player.imageUrl' [src]='player.imageUrl' alt='{{player.name}}' />
+          {{ player.name }}
+        </div>
 
-  <button
-    class='rounded-full text-xl bg-green-900 text-white p-3'
-    *ngIf='session.host === user?.id && players.length > 1' (click)="startSession()"
-  >
-    <mat-icon>play_arrow</mat-icon>
-    Start Game
-  </button>
+        <div class='flex items-center' *ngIf='player.id === user.id'>
+          <span class='text-lg font-bold mr-3'>{{i + 1}}</span>
+          <img class='rounded-full w-9 mr-3' *ngIf='player.imageUrl' [src]='player.imageUrl' alt='{{player.name}}' />
+          <mat-form-field class='w-48'>
+            <mat-label>Nickname</mat-label>
+            <input matInput placeholder="Nickname" formControlName='name'>
+            <mat-hint *ngIf='joinGameForm.value.name !== player.name'>
+              click APPLY to update nickname
+            </mat-hint>
+          </mat-form-field>
 
-  <button
-    *ngIf='!myPlayer'
-    class='rounded-full text-xl bg-green-900 text-white p-3'
-    [disabled]='!joinGameForm.valid'
-    (click)='joinGame()'
-  >
-    Join the game
-  </button>
+          <button
+            *ngIf='joinGameForm.value.name !== player.name'
+            class='rounded text-xl bg-green-900 text-white px-6 py-3 ml-6'
+            (click)='joinGame()'
+          >
+            APPLY
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class='flex flex-col' *ngIf='session.host === user?.id'>
+
+    <mat-checkbox formControlName='doubleCards'>
+      x2 cards (up to 8 players)
+    </mat-checkbox>
+
+    <h1
+      class='text-xl font-bold text-green-900 p-3'
+      *ngIf='players.length === 1'
+    >
+      Wait fot players to join
+    </h1>
+
+    <button
+      class='rounded-full text-xl bg-green-900 text-white p-3'
+      *ngIf='players.length > 1' (click)="startSession()"
+    >
+      <mat-icon>play_arrow</mat-icon>
+      Start Game
+    </button>
+
+  </div>
 </form>
+

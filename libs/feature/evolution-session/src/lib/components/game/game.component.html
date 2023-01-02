@@ -99,7 +99,7 @@
           [actioned]='card.canBeActioned || myPlayer.attack?.animalIndex === card.index'
           (click)='actionAnimal(card)'
         >
-          <feature-animal-status
+          <feature-animal-status class='head'
             [session]='session'
             [animal]='card'
           ></feature-animal-status>
@@ -171,7 +171,7 @@
         [actioned]='card.canBeActioned || (myPlayer.attack?.player === player.id && myPlayer.attack?.carnivorous === card.index)'
         (click)='actionEnemyAnimal(card, player)'
       >
-        <feature-animal-status
+        <feature-animal-status class='head'
           [session]='session'
           [animal]='card'
         ></feature-animal-status>

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input, OnChanges, ViewEncapsulation } from '@angular/core';
-import { EvolutionSessionEntity, EvolutionSessionFacade } from '@boardgames/data/evolution-session';
+import { EvolutionSessionEntity, EvolutionSessionFacade, Player } from '@boardgames/data/evolution-session';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthFacade, User } from '@boardgames/data/auth';
 
@@ -12,8 +12,8 @@ import { AuthFacade, User } from '@boardgames/data/auth';
 export class LobbyComponent implements OnChanges {
   @Input() session!: EvolutionSessionEntity;
   @Input() user!: User;
-  myPlayer = this.session.players[this.user.id];
-  players = Object.values(this.session.players);
+  myPlayer!: Player;
+  players: Player[] = [];
 
   joinGameForm: FormGroup = this.fb.nonNullable.group({
     name: new FormControl<string>('', [Validators.minLength(3), Validators.required]),
@@ -28,11 +28,15 @@ export class LobbyComponent implements OnChanges {
   }
 
   ngOnChanges(): void {
-    this.myPlayer = this.session.players[this.user.id];
     this.players = Object.values(this.session.players);
+    this.myPlayer = this.session.players[this.user.id];
 
-    if (!this.session.started && !this.joinGameForm.value.name) {
+    if (!this.joinGameForm.value.name) {
       this.joinGameForm.get('name')?.setValue(this.user.name);
+    }
+
+    if (!this.myPlayer) {
+      this.joinGame();
     }
   }
 
@@ -41,6 +45,7 @@ export class LobbyComponent implements OnChanges {
     const double = this.joinGameForm.value.doubleCards;
     this.sessionFacade.startSession({...this.user, name}, this.session, {double});
   }
+
   joinGame(): void {
     const name = this.joinGameForm.value.name;
     this.sessionFacade.joinSession({...this.user, name}, this.session.id as string);
