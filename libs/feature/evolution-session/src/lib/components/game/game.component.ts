@@ -58,7 +58,7 @@ export class GameComponent implements OnChanges {
     event.stopPropagation();
     this.resetAnimalsActions();
 
-    if (this.myPlayer.attack?.animalIndex === animal.index) {
+    if (this.session.attack?.pray.animal === animal.index) {
       this.#defence(animal, prop);
     } else {
       this.#useAnimalProperty(animal, prop);
@@ -232,6 +232,8 @@ export class GameComponent implements OnChanges {
         return this.createPiracyTargets(animal);
       case CardTypes.CARNIVOROUS:
         return this.createCarnivorousTargets(animal);
+      default:
+        return this.cancelSelectedProperty();
     }
   }
 
@@ -327,13 +329,18 @@ export class GameComponent implements OnChanges {
 
   attack(animal: Animal, player: Player): void {
     const carnivorous = this.myPlayer.animals[this.selectedAnimalIndex as number];
-    if (this.#cannotBeEaten(animal, player, carnivorous)) {
-      player.attack = {
-        carnivorous: this.selectedAnimalIndex as number,
-        player: this.myPlayer.id,
-        animalIndex: animal.index
+    if (this.#animalCanDefend(animal, player, carnivorous)) {
+      this.session.attack = {
+        carnivorous: {
+          player: this.myPlayer.id,
+          animal: this.selectedAnimalIndex as number
+        },
+        pray: {
+          player: player.id,
+          animal: animal.index
+        }
       };
-      this.sessionFacade.createAttack(player, this.session);
+      this.sessionFacade.createAttack(this.session);
     } else {
       this.eatAnimal(carnivorous, animal, player, this.myPlayer);
       this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
@@ -341,14 +348,15 @@ export class GameComponent implements OnChanges {
   }
 
   useMimicry(animal: Animal): void {
-    if (this.myPlayer.attack && animal.index !== this.selectedAnimalIndex) {
+    if (this.session.attack && animal.index !== this.selectedAnimalIndex) {
       this.selectedAnimalIndex = animal.index;
-      const attacker = this.session.players[this.myPlayer.attack.player];
-      const carnivorous = attacker.animals[this.myPlayer.attack.carnivorous];
-      if (this.#cannotBeEaten(animal, this.myPlayer, carnivorous)) {
-        this.myPlayer.attack.animalIndex = animal.index;
+      const attacker = this.session.players[this.session.attack.carnivorous.player];
+      const carnivorous = attacker.animals[this.session.attack.carnivorous.animal];
+      if (this.#animalCanDefend(animal, this.myPlayer, carnivorous)) {
+        this.session.attack.pray.animal = animal.index;
       } else {
         this.eatAnimal(carnivorous, animal, this.myPlayer, attacker);
+        this.sessionFacade.respondAttack(this.myPlayer, this.session);
       }
       this.cancelSelectedProperty();
     }
@@ -356,7 +364,7 @@ export class GameComponent implements OnChanges {
 
   /** ------------------ DEFENCE ------------------ */
   #defence(animal: Animal, prop: CardTypes): void {
-    if (!this.myPlayer.attack) {
+    if (!this.session.attack) {
       return;
     }
 
@@ -376,9 +384,9 @@ export class GameComponent implements OnChanges {
   }
 
   tryToRun(animal: Animal): void {
-    const attack: Attack = this.myPlayer.attack as Attack;
-    const attacker: Player = this.session.players[attack.player];
-    const carnivorous = attacker.animals[attack.carnivorous];
+    const attack: Attack = this.session.attack as Attack;
+    const attacker: Player = this.session.players[attack.carnivorous.player];
+    const carnivorous = attacker.animals[attack.carnivorous.animal];
     carnivorous.attacked = true;
 
     if (this.sessionFacade.getDiceNumber() < 4) {
@@ -394,11 +402,11 @@ export class GameComponent implements OnChanges {
   }
 
   useTailLoss(animal: Animal, prop: CardTypes): void {
-    if (!this.myPlayer.attack) {
+    if (!this.session.attack) {
       return;
     }
-    const attacker = this.session.players[this.myPlayer.attack.player];
-    const carnivorous = attacker.animals[this.myPlayer.attack.carnivorous];
+    const attacker = this.session.players[this.session.attack.carnivorous.player];
+    const carnivorous = attacker.animals[this.session.attack.carnivorous.animal];
     carnivorous.attacked = true;
     this.handleFeedAnimal(carnivorous);
     this.handleCommunications(carnivorous, attacker, [CardTypes.COMMUNICATION]);
@@ -425,9 +433,9 @@ export class GameComponent implements OnChanges {
   createMimicryTargets(animal: Animal, prop: CardTypes): void {
     this.selectedProperty = prop;
     this.selectedAnimalIndex = animal.index;
-    const attack: Attack = this.myPlayer.attack as Attack;
-    const attacker: Player = this.session.players[attack.player];
-    const carnivorous = attacker.animals[attack.carnivorous];
+    const attack: Attack = this.session.attack as Attack;
+    const attacker: Player = this.session.players[attack.carnivorous.player];
+    const carnivorous = attacker.animals[attack.carnivorous.animal];
     this.myPlayer.animals.forEach(a => {
       a.canBeActioned = this.canBeMimicryTarget(this.myPlayer, animal, carnivorous, a, attacker);
     });
@@ -480,7 +488,7 @@ export class GameComponent implements OnChanges {
     return !protectedBySymbiot;
   }
 
-  #cannotBeEaten(animal: Animal, player: Player, carnivorous: Animal): boolean {
+  #animalCanDefend(animal: Animal, player: Player, carnivorous: Animal): boolean {
     const hasRunning = animal.properties.includes(CardTypes.RUNNING);
     const hasTailLoss = animal.properties.includes(CardTypes.TAIL_LOSS);
 
@@ -537,7 +545,7 @@ export class GameComponent implements OnChanges {
       players.push(players.shift() as Player);
     }
     for (const player of players) {
-      const scavenger = player.animals.find(a => a.properties.includes(CardTypes.SCAVENGER) && this.canEat(a));
+      const scavenger = this.session.players[player.id].animals.find(a => a.properties.includes(CardTypes.SCAVENGER) && this.canEat(a));
       if (scavenger) {
         this.handleFeedAnimal(scavenger);
         this.handleCommunications(scavenger, player, [CardTypes.COMMUNICATION]);
@@ -609,7 +617,7 @@ export class GameComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     const { previousValue, currentValue } = changes['session'];
     if (previousValue) {
-      if (currentValue.players[this.user.id].attack) {
+      if (currentValue.attack) {
         const audio = new Audio('assets/attack.mp3');
         audio.play();
       } else if (previousValue.phase !== currentValue.phase) {

@@ -61,21 +61,20 @@ export class EvolutionSessionFacade {
     this.#processAction(player, session);
   }
 
-  createAttack(player: Player, session: EvolutionSessionEntity): void {
+  createAttack(session: EvolutionSessionEntity): void {
 
     const evolutionSession: Partial<EvolutionSessionEntity> = {
-      id: session.id,
-      players: {[player.id]: player},
-      currentPlayer: player.id,
+      ...session,
+      currentPlayer: session.attack?.pray.player,
     }
 
     this.store.dispatch(EvolutionSessionActions.updateSession({evolutionSession}));
   }
 
   respondAttack(player: Player, session: EvolutionSessionEntity): void {
-    const prevPlayerId = player.attack?.player as string;
+    const prevPlayerId = session.attack?.carnivorous.player as string;
     session.currentPlayer = prevPlayerId;
-    player.attack = null;
+    session.attack = null;
     session.players[player.id] = player;
     this.#processAction(session.players[prevPlayerId], session);
   }
@@ -272,10 +271,6 @@ export class EvolutionSessionFacade {
     });
   }
 
-  #removeBrokenProperties(animals: Animal[], properties: DoubleProperty[]): DoubleProperty[] {
-    return properties.filter(p => animals.find(a => p.animal1 === a.index) && animals.find(a => p.animal2 === a.index))
-  }
-
   #killHungryAnimals(player: Player): Player {
     const animals: Animal[] = [];
     for (const animal of player.animals) {
@@ -387,7 +382,6 @@ export class EvolutionSessionFacade {
       animals: [],
       properties: [],
       endPhase: false,
-      attack: null,
       score: 0
     };
   }

@@ -93,14 +93,17 @@ export interface Player {
   animals: Animal[];
   properties: DoubleProperty[];
   endPhase: boolean;
-  attack: Attack | null;
   score: number;
 }
 export interface Attack {
-
-  carnivorous: number;
-  player: string;
-  animalIndex: number;
+  carnivorous: {
+    player: string;
+    animal: number;
+  };
+  pray: {
+    player: string;
+    animal: number;
+  };
 }
 
 export interface EvolutionSessionEntity {
@@ -114,6 +117,7 @@ export interface EvolutionSessionEntity {
   eat: number;
   phase: Phase;
   finished: boolean;
+  attack: Attack | null;
   players: Record<string, Player>;
 }
 

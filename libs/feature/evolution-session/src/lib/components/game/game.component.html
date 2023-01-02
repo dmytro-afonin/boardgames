@@ -14,7 +14,7 @@
       [class.bg-green-900]='!foodSelected'
       [class.bg-amber-300]='foodSelected'
       [class.hover:bg-amber-400]='foodSelected'
-      [class.pointer-events-none]='myPlayer.id !== session.currentPlayer || myPlayer.attack || !session.eat'
+      [class.pointer-events-none]='myPlayer.id !== session.currentPlayer || session.attack || !session.eat'
       (click)='selectFood()'
       *ngIf='session.phase === 1'
     >
@@ -66,7 +66,7 @@
 
           <button
             class='bg-green-900 rounded-full text-white flex items-center p-1 pr-2'
-            *ngIf='player.id === myPlayer.id && session.currentPlayer === myPlayer.id && !myPlayer.attack'
+            *ngIf='player.id === myPlayer.id && session.currentPlayer === myPlayer.id && !session.attack'
             (click)="endPhase()"
           >
             <mat-icon>next_plan</mat-icon>
@@ -93,11 +93,11 @@
           class='card mr-3 last:mr-0 border-red-500 rounded-3xl'
           [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
           [class.cursor-pointer]='card.canBeActioned'
-          [class.border-4]='myPlayer.attack?.animalIndex === card.index'
+          [class.border-4]='session.attack && session.attack.pray.animal === card.index && session.attack.pray.player === player.id'
+          [actioned]='card.canBeActioned || (!!session.attack && session.attack.carnivorous.animal === card.index && session.attack.carnivorous.player === player.id)'
+          (click)='actionAnimal(card)'
           cdkDrag
           [cdkDragData]='card'
-          [actioned]='card.canBeActioned || myPlayer.attack?.animalIndex === card.index'
-          (click)='actionAnimal(card)'
         >
           <feature-animal-status class='head'
             [session]='session'
@@ -167,8 +167,8 @@
         class='mr-3 last:mr-0 border-red-500 rounded-3xl'
         [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
         [class.cursor-pointer]='card.canBeActioned'
-        [class.border-4]='myPlayer.attack?.animalIndex === card.index'
-        [actioned]='card.canBeActioned || (myPlayer.attack?.player === player.id && myPlayer.attack?.carnivorous === card.index)'
+        [class.border-4]='session.attack && session.attack.pray.animal === card.index && session.attack.pray.player === player.id'
+        [actioned]='card.canBeActioned || ((!!session.attack) && session.attack.carnivorous.animal === card.index && session.attack.carnivorous.player === player.id)'
         (click)='actionEnemyAnimal(card, player)'
       >
         <feature-animal-status class='head'
