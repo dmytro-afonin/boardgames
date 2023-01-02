@@ -38,3 +38,6 @@
 .game {
   min-width: 0;
 }
+.log {
+  max-height: 90vh;
+}

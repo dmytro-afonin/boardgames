@@ -1,7 +1,7 @@
 <div class='flex'>
 
   <div class='flex flex-col flex-grow game'>
-    <div class='flex flex-grow'>
+    <div class='flex'>
       <div>
         Phase: <span class='font-bold text-lg'>{{session.phase === 0 ? 'Growing' : 'Eating' }}</span>
       </div>
@@ -208,7 +208,7 @@
     </mat-accordion>
   </div>
 
-  <div class='w-96 game pl-3' *ngIf='showLog'>
+  <div class='w-96 game log pl-3 overflow-auto' *ngIf='showLog'>
     <div
       *ngFor='let action of session.log'
       [@properties]='"in"'
