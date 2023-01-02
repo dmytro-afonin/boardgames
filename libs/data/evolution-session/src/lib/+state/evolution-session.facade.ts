@@ -7,7 +7,6 @@ import {
   Animal,
   CARDS_BASE_SCHEME,
   CardSchemeItem,
-  DoubleProperty,
   EvolutionSessionEntity, GameOptions,
   HandCard,
   Phase,
@@ -91,7 +90,6 @@ export class EvolutionSessionFacade {
   }
   endPhase(player: Player, session: EvolutionSessionEntity): void {
     player.endPhase = true;
-
     this.#processAction(player, session);
   }
   startSession(user: User, evolutionSession: EvolutionSessionEntity, options: GameOptions): void {
@@ -110,6 +108,10 @@ export class EvolutionSessionFacade {
     const randomPlayerIndex = this.#getRandomIndex(playerIds.length);
     session.firstPlayer = playerIds[randomPlayerIndex];
     session.currentPlayer = session.firstPlayer;
+    session.log.push({
+      time: Date.now(),
+      action: 'Game started'
+    });
     this.store.dispatch(EvolutionSessionActions.updateSession({evolutionSession: session}));
   }
 
@@ -134,6 +136,7 @@ export class EvolutionSessionFacade {
       eat: 0,
       phase: Phase.GROWING,
       started: false,
+      log: [],
       players: {
         [user.id]: player
       }

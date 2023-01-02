@@ -1,194 +1,219 @@
 <div class='flex'>
-  <div>
-    Phase: <span class='font-bold text-lg'>{{session.phase === 0 ? 'Growing' : 'Eating' }}</span>
-  </div>
 
-  <div class='ml-3'>
-    Cards left: <span class='font-bold text-lg'>{{session.cards.length}}</span>
-  </div>
-
-  <div class='flex-grow flex justify-center'>
-    <button
-      class='text-white rounded-full flex items-center px-3 transition-all hover:scale-105'
-      [class.hover:bg-green-800]='!foodSelected'
-      [class.bg-green-900]='!foodSelected'
-      [class.bg-amber-300]='foodSelected'
-      [class.hover:bg-amber-400]='foodSelected'
-      [class.pointer-events-none]='myPlayer.id !== session.currentPlayer || session.attack || !session.eat'
-      (click)='selectFood()'
-      *ngIf='session.phase === 1'
-    >
-      <mat-icon>eco</mat-icon> X {{session.eat}}
-    </button>
-  </div>
-
-  <button mat-button (click)="accordion.openAll()">Expand All</button>
-  <button mat-button (click)="accordion.closeAll()">Collapse All</button>
-</div>
-<mat-accordion #accordion=matAccordion multi>
-  <mat-expansion-panel
-    *ngFor='let player of players'
-    [expanded]='true'
-    [class.bg-green-100]='player.id === session.currentPlayer'
-    [class.bg-lime-50]='player.id !== session.currentPlayer'
-  >
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        <span class='text-lg font-bold mr-3'>{{player.order + 1}}</span>
-        <img class='rounded-full w-9 mr-3' *ngIf='player.imageUrl' [src]='player.imageUrl' alt='{{player.name}}' />
-        {{ player.name }}
-      </mat-panel-title>
-
-      <mat-panel-description>
-        <div class='flex w-full'>
-          <div class='flex-grow'>
-            <span
-              class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
-              *ngIf='player.id === session.currentPlayer'
-            >
-              Current Turn
-            </span>
-
-            <span
-              class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
-              *ngIf='player.id === session.firstPlayer'
-            >
-              First Turn
-            </span>
-
-            <span
-              class='bg-green-900 rounded-full text-lime-50 py-1 px-3'
-              *ngIf='player.endPhase'
-            >
-              Finished
-            </span>
-          </div>
-
-          <button
-            class='bg-green-900 rounded-full text-white flex items-center p-1 pr-2'
-            *ngIf='player.id === myPlayer.id && session.currentPlayer === myPlayer.id && !session.attack'
-            (click)="endPhase()"
-          >
-            <mat-icon>next_plan</mat-icon>
-            <span class='pl-3'>End phase</span>
-          </button>
-        </div>
-      </mat-panel-description>
-    </mat-expansion-panel-header>
-
-    <ng-container *ngIf='player.id === myPlayer.id'>
-      <div
-        #myDeck="cdkDropList"
-        cdkDropList
-        class='list flex items-stretch border-dashed border-green-900 rounded-3xl p-3'
-        [class.border-2]='session.currentPlayer === myPlayer.id'
-        cdkDropListOrientation="horizontal"
-        [cdkDropListSortPredicate]='preventPlayAnimalBetweenCommunications'
-        [cdkDropListData]="myPlayer.animals"
-        [cdkDropListDisabled]='true'
-        (cdkDropListDropped)="animalDropped($event)"
-      >
-        <feature-animal
-          *ngFor="let card of myPlayer.animals"
-          class='card mr-3 last:mr-0 border-red-500 rounded-3xl'
-          [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
-          [class.cursor-pointer]='card.canBeActioned'
-          [class.border-4]='session.attack && session.attack.pray.animal === card.index && session.attack.pray.player === player.id'
-          [actioned]='card.canBeActioned || (!!session.attack && session.attack.carnivorous.animal === card.index && session.attack.carnivorous.player === player.id)'
-          (click)='actionAnimal(card)'
-          cdkDrag
-          [cdkDragData]='card'
-        >
-          <feature-animal-status class='head'
-            [session]='session'
-            [animal]='card'
-          ></feature-animal-status>
-
-          <feature-animal-communications
-            [player]='player'
-            [animal]='card'
-          ></feature-animal-communications>
-
-          <div class='pb-3'>
-            <div class='border-4'
-                 *ngFor='let property of card.properties'
-                 [class.pointer-events-none]='session.phase === 0 || foodSelected'
-                 [class.border-transparent]='selectedAnimalIndex !== card.index || selectedProperty !== property'
-                 [class.border-amber-300]='selectedAnimalIndex === card.index && selectedProperty === property'
-                 (click)='selectActionProperty($event, property, card)'
-            >
-              <feature-property
-                [type]='property'
-              >
-              </feature-property>
-            </div>
-          </div>
-        </feature-animal>
+  <div class='flex flex-col flex-grow game'>
+    <div class='flex flex-grow'>
+      <div>
+        Phase: <span class='font-bold text-lg'>{{session.phase === 0 ? 'Growing' : 'Eating' }}</span>
       </div>
 
-      <div
-        cdkDropList
-        [cdkDropListData]="myPlayer.hand"
-        class='list flex items-stretch p-3'
-        cdkDropListOrientation="horizontal"
-        [cdkDropListAutoScrollStep]='6'
-        [cdkDropListDisabled]='session.currentPlayer !== myPlayer.id || session.phase === 1'
-        (cdkDropListDropped)="sortAnimalsInHand($event)"
-        [cdkDropListConnectedTo]="[myDeck]"
-      >
-        <feature-animal
-          *ngFor="let card of myPlayer.hand;let i = index;"
-          [class.pointer-events-none]='session.currentPlayer !== myPlayer.id || session.phase === 1'
-          class='card mr-3 last:mr-0 scale-100 hover:scale-110'
-          (cdkDragStarted)='cancelSelectedProperty()'
-          cdkDrag
-          [cdkDragData]='card'
-          (click)='selectProperty(card, i)'
-          [actioned]='selectedAnimalIndex === i && session.phase === 0'
-          [type]='card.type1'
-        >
-          <feature-property class='head' [type]='card.type1'></feature-property>
-          <div class='flex flex-col rounded-b-2xl overflow-hidden justify-end text-lg h-16'>
-            <feature-property
-              class='cursor-pointer rotate-180 hover:brightness-110'
-              *ngIf='card.type2'
-              (click)='switchCardType(card)'
-              [type]='card.type2'
-            >
-            </feature-property>
-          </div>
-        </feature-animal>
+      <div class='ml-3'>
+        Cards left: <span class='font-bold text-lg'>{{session.cards.length}}</span>
       </div>
-    </ng-container>
 
-    <div class='list flex items-stretch p-3' *ngIf='player.id !== myPlayer.id'>
-      <feature-animal
-        *ngFor="let card of player.animals"
-        class='mr-3 last:mr-0 border-red-500 rounded-3xl'
-        [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
-        [class.cursor-pointer]='card.canBeActioned'
-        [class.border-4]='session.attack && session.attack.pray.animal === card.index && session.attack.pray.player === player.id'
-        [actioned]='card.canBeActioned || ((!!session.attack) && session.attack.carnivorous.animal === card.index && session.attack.carnivorous.player === player.id)'
-        (click)='actionEnemyAnimal(card, player)'
-      >
-        <feature-animal-status class='head'
-          [session]='session'
-          [animal]='card'
-        ></feature-animal-status>
+      <div class='flex-grow flex justify-center'>
+        <button
+          class='text-white rounded-full flex items-center px-3 transition-all hover:scale-105'
+          [class.hover:bg-green-800]='!foodSelected'
+          [class.bg-green-900]='!foodSelected'
+          [class.bg-amber-300]='foodSelected'
+          [class.hover:bg-amber-400]='foodSelected'
+          [class.pointer-events-none]='myPlayer.id !== session.currentPlayer || session.attack || !session.eat'
+          (click)='selectFood()'
+          *ngIf='session.phase === 1'
+        >
+          <mat-icon>eco</mat-icon> X {{session.eat}}
+        </button>
+      </div>
 
-        <feature-animal-communications
-          [player]='player'
-          [animal]='card'
-        ></feature-animal-communications>
-
-        <div class='pb-3'>
-          <feature-property
-            *ngFor='let property of card.properties'
-            [type]='property'
-          >
-          </feature-property>
-        </div>
-      </feature-animal>
+      <button mat-button (click)="accordion.openAll()">Expand All</button>
+      <button mat-button (click)="accordion.closeAll()">Collapse All</button>
+      <button mat-button (click)="showLog = !showLog">Toggle Log</button>
     </div>
-  </mat-expansion-panel>
-</mat-accordion>
+    <mat-accordion #accordion=matAccordion multi>
+      <mat-expansion-panel
+        *ngFor='let player of players; trackBy: trackByPlayer'
+        [expanded]='true'
+        [class.bg-green-100]='player.id === session.currentPlayer'
+        [class.bg-lime-50]='player.id !== session.currentPlayer'
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span class='text-lg font-bold mr-3'>{{player.order + 1}}</span>
+            <img class='rounded-full w-9 mr-3' *ngIf='player.imageUrl' [src]='player.imageUrl' alt='{{player.name}}' />
+            {{ player.name }}
+          </mat-panel-title>
+
+          <mat-panel-description>
+            <div class='flex items-center w-full'>
+              <div class='flex-grow flex items-center'>
+                <div
+                  class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
+                  *ngIf='player.id === session.currentPlayer'
+                >
+                  Current Turn
+                </div>
+
+                <div
+                  class='bg-green-900 rounded-full text-lime-50 py-1 px-3 mr-3'
+                  *ngIf='player.id === session.firstPlayer'
+                >
+                  First Turn
+                </div>
+
+                <div
+                  class='bg-green-900 rounded-full text-lime-50 py-1 px-3'
+                  *ngIf='player.endPhase'
+                >
+                  Finished
+                </div>
+              </div>
+
+              <button
+                class='bg-green-900 rounded-full text-white flex items-center p-1 pr-2'
+                *ngIf='player.id === myPlayer.id && session.currentPlayer === myPlayer.id && !session.attack'
+                (click)="endPhase($event)"
+              >
+                <mat-icon>next_plan</mat-icon>
+                <span class='pl-3'>End phase</span>
+              </button>
+            </div>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <ng-container *ngIf='player.id === myPlayer.id'>
+          <div
+            #myDeck="cdkDropList"
+            cdkDropList
+            class='list flex items-stretch border-dashed border-green-900 rounded-3xl p-3'
+            [class.border-2]='session.currentPlayer === myPlayer.id'
+            cdkDropListOrientation="horizontal"
+            [cdkDropListSortPredicate]='preventPlayAnimalBetweenCommunications'
+            [cdkDropListData]="myPlayer.animals"
+            [cdkDropListDisabled]='true'
+            (cdkDropListDropped)="animalDropped($event)"
+          >
+            <feature-animal
+              *ngFor="let card of myPlayer.animals; let i = index; trackBy: trackByAnimal"
+              class='card mr-3 last:mr-0 border-red-500 rounded-3xl'
+              [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
+              [ngStyle]='{zIndex: myPlayer.animals.length - i}'
+              [class.cursor-pointer]='card.canBeActioned'
+              [class.border-4]='session.attack && session.attack.pray.animal === card.index && session.attack.pray.player === player.id'
+              [actioned]='card.canBeActioned || (!!session.attack && session.attack.carnivorous.animal === card.index && session.attack.carnivorous.player === player.id)'
+              (click)='actionAnimal(card)'
+              cdkDrag
+              [cdkDragData]='card'
+            >
+              <feature-animal-status
+                class='head'
+                [session]='session'
+                [animal]='card'
+              ></feature-animal-status>
+
+              <feature-animal-communications
+                [player]='player'
+                [animal]='card'
+              ></feature-animal-communications>
+
+              <div class='pb-3'>
+                <div class='border-4'
+                     [@properties]='"in"'
+                     *ngFor='let property of card.properties; trackBy: trackByProperty'
+                     [class.pointer-events-none]='session.phase === 0 || foodSelected'
+                     [class.border-transparent]='selectedAnimalIndex !== card.index || selectedProperty !== property'
+                     [class.border-amber-300]='selectedAnimalIndex === card.index && selectedProperty === property'
+                     (click)='selectActionProperty($event, property, card)'
+                >
+                  <feature-property
+                    [type]='property'
+                  >
+                  </feature-property>
+                </div>
+              </div>
+            </feature-animal>
+          </div>
+
+          <div
+            cdkDropList
+            [cdkDropListData]="myPlayer.hand"
+            class='list flex items-stretch p-3'
+            cdkDropListOrientation="horizontal"
+            [cdkDropListAutoScrollStep]='6'
+            [cdkDropListDisabled]='session.currentPlayer !== myPlayer.id || session.phase === 1'
+            (cdkDropListDropped)="sortAnimalsInHand($event)"
+            [cdkDropListConnectedTo]="[myDeck]"
+          >
+            <feature-animal
+              *ngFor="let card of myPlayer.hand; let i = index;"
+              [class.pointer-events-none]='session.currentPlayer !== myPlayer.id || session.phase === 1'
+              class='card mr-3 last:mr-0 scale-100 hover:scale-110'
+              (cdkDragStarted)='cancelSelectedProperty()'
+              cdkDrag
+              [cdkDragData]='card'
+              (click)='selectProperty(card, i)'
+              [actioned]='selectedAnimalIndex === i && session.phase === 0'
+              [type]='card.type1'
+            >
+              <feature-property class='head' [type]='card.type1'></feature-property>
+              <div class='flex flex-col rounded-b-2xl overflow-hidden justify-end text-lg h-16'>
+                <feature-property
+                  class='cursor-pointer rotate-180 hover:brightness-110'
+                  *ngIf='card.type2'
+                  (click)='switchCardType(card)'
+                  [type]='card.type2'
+                >
+                </feature-property>
+              </div>
+            </feature-animal>
+          </div>
+        </ng-container>
+
+        <div class='list flex items-stretch p-3' *ngIf='player.id !== myPlayer.id'>
+          <feature-animal
+            [@properties]='"in"'
+            *ngFor="let card of player.animals; let i = index; trackBy: trackByAnimal"
+            class='mr-3 last:mr-0 border-red-500 rounded-3xl'
+            [ngStyle]='{zIndex: player.animals.length - i}'
+            [class.pointer-events-none]='session.currentPlayer !== myPlayer.id'
+            [class.cursor-pointer]='card.canBeActioned'
+            [class.border-4]='session.attack && session.attack.pray.animal === card.index && session.attack.pray.player === player.id'
+            [actioned]='card.canBeActioned || ((!!session.attack) && session.attack.carnivorous.animal === card.index && session.attack.carnivorous.player === player.id)'
+            (click)='actionEnemyAnimal(card, player)'
+          >
+            <feature-animal-status
+              class='head'
+              [session]='session'
+              [animal]='card'
+            ></feature-animal-status>
+
+            <feature-animal-communications
+              [player]='player'
+              [animal]='card'
+            ></feature-animal-communications>
+
+            <div class='pb-3'>
+              <div
+                [@properties]='"in"'
+                *ngFor='let property of card.properties; trackBy: trackByProperty'
+              >
+                <feature-property
+                  [type]='property'
+                >
+                </feature-property>
+              </div>
+            </div>
+          </feature-animal>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <div class='w-96 game pl-3' *ngIf='showLog'>
+    <div
+      *ngFor='let action of session.log'
+      [@properties]='"in"'
+    >
+      [{{action.time | date : 'HH:mm:ss'}}]: {{action.action}}
+    </div>
+  </div>
+</div>

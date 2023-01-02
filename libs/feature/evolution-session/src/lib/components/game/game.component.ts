@@ -13,17 +13,38 @@ import {
 } from '@boardgames/data/evolution-session';
 import { User } from '@boardgames/data/auth';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { UI_PROPERTY_MAP } from '../../ui-player';
+import { animate, keyframes, state, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'feature-game',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.css'],
   encapsulation: ViewEncapsulation.Emulated,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('properties', [
+      state('in', style({transform: 'translateX(0) translateY(0) scale(1)'})),
+      transition('void => *', [
+        animate('.6s ease-in' , keyframes([
+          style({opacity:0 , transform:'translateY(-100%) scale(1)', border: "2px solid yellow", offset: 0}),
+          style({opacity:1 , transform:'translateY(0) scale(1.3)', offset: 0.5}),
+          style({opacity:1 , transform:'translateY(0) scale(1)', border: "none", offset: 1}),
+        ]))
+      ]),
+      transition('* => void', [
+        animate('.6s ease-in', keyframes([
+          style({ opacity: 1, transform: 'translateY(0)', offset: 0 }),
+          style({ opacity: 0, transform: 'translateY(-100%)', offset: 1 }),
+        ]))
+      ])
+    ])
+  ]
 })
 export class GameComponent implements OnChanges {
   @Input() session!: EvolutionSessionEntity;
   @Input() user!: User;
+  showLog = false;
   players: Player[] = [];
   myPlayer!: Player;
   selectedProperty!: CardTypes | null;
@@ -34,7 +55,15 @@ export class GameComponent implements OnChanges {
     private readonly sessionFacade: EvolutionSessionFacade
   ) {
   }
-
+  trackByPlayer(_i: number, p: Player): string {
+    return p.id;
+  }
+  trackByAnimal(_i: number, a: Animal): number {
+    return a.index;
+  }
+  trackByProperty(_i: number, a: CardTypes): CardTypes {
+    return a;
+  }
   /** ------------------ USER ACTIONS ------------------ */
 
   sortAnimalsInHand(event: CdkDragDrop<HandCard[]>) {
@@ -77,7 +106,13 @@ export class GameComponent implements OnChanges {
     }
   }
 
-  endPhase(): void {
+  endPhase(event: MouseEvent): void {
+    event.stopPropagation();
+    this.session.log.push({
+      time: Date.now(),
+      action: `${this.myPlayer.name} finished phase`
+    });
+
     this.cancelSelectedProperty();
     this.sessionFacade.endPhase(this.myPlayer, this.session);
   }
@@ -98,6 +133,10 @@ export class GameComponent implements OnChanges {
       }
       this.myPlayer.hand.splice(this.selectedAnimalIndex as number, 1);
 
+      this.session.log.push({
+        time: Date.now(),
+        action: `${this.myPlayer.name} added ${UI_PROPERTY_MAP[this.selectedProperty].title} to his animal`
+      });
       this.cancelSelectedProperty();
       this.sessionFacade.addPropertyToMyAnimal(this.myPlayer, this.session);
     }
@@ -134,6 +173,10 @@ export class GameComponent implements OnChanges {
       });
       this.myPlayer.animals.splice(event.currentIndex, 0, animal);
       this.myPlayer.hand.splice(event.previousIndex, 1);
+      this.session.log.push({
+        time: Date.now(),
+        action: `${this.myPlayer.name} added new animal`
+      });
       this.sessionFacade.playAnimal(this.myPlayer, this.session);
     }
   }
@@ -142,7 +185,10 @@ export class GameComponent implements OnChanges {
       animal.requiredFood += WEIGHT_PROPERTY_MAP[this.selectedProperty];
       animal.properties.unshift(this.selectedProperty);
       this.myPlayer.hand.splice(this.selectedAnimalIndex as number, 1);
-
+      this.session.log.push({
+        time: Date.now(),
+        action: `${this.myPlayer.name} added parasite to ${enemy.name} animal`
+      });
       this.cancelSelectedProperty();
       this.sessionFacade.addPropertyToEnemyAnimal(this.myPlayer, this.session, enemy);
     }
@@ -211,6 +257,10 @@ export class GameComponent implements OnChanges {
   giveFoodToAnimal(animal: Animal): void {
     this.handleFeedAnimal(animal);
     this.session.eat--;
+    this.session.log.push({
+      time: Date.now(),
+      action: `${this.myPlayer.name} took 1 food`
+    });
     this.handleCommunications(animal,  this.myPlayer,[CardTypes.COMMUNICATION, CardTypes.COOPERATION]);
     this.foodSelected = false;
     this.sessionFacade.feedAnimal(this.myPlayer, this.session);
@@ -241,6 +291,10 @@ export class GameComponent implements OnChanges {
     if ((animal.food < animal.requiredFood) && animal.fat) {
       animal.food++;
       animal.fat--;
+      this.session.log.push({
+        time: Date.now(),
+        action: `${this.myPlayer.name} used fat to feed animal`
+      });
       this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
     }
     this.cancelSelectedProperty();
@@ -249,6 +303,10 @@ export class GameComponent implements OnChanges {
   destroyFood(): void {
     if (this.session.eat) {
       this.session.eat--;
+      this.session.log.push({
+        time: Date.now(),
+        action: `${this.myPlayer.name} destroyed 1 food`
+      });
       this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
     }
     this.cancelSelectedProperty();
@@ -257,6 +315,10 @@ export class GameComponent implements OnChanges {
   useHibernation(animal: Animal): void {
     if (!animal.hibernationCooldown && !animal.hibernation) {
       animal.hibernation = true;
+      this.session.log.push({
+        time: Date.now(),
+        action: `${this.myPlayer.name} activated hibernation`
+      });
       this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
     }
     this.cancelSelectedProperty();
@@ -306,7 +368,7 @@ export class GameComponent implements OnChanges {
   playPropertyOnAnimal(animal: Animal, player: Player): void {
     switch (this.selectedProperty) {
       case CardTypes.PIRACY: {
-        this.stealFood(animal);
+        this.stealFood(animal, player);
         break;
       }
       case CardTypes.CARNIVOROUS:
@@ -318,11 +380,15 @@ export class GameComponent implements OnChanges {
     this.cancelSelectedProperty();
   }
 
-  stealFood(animal: Animal): void {
+  stealFood(animal: Animal, player: Player): void {
     animal.food--;
     const pirate: Animal = this.myPlayer.animals[this.selectedAnimalIndex as number];
     this.handleFeedAnimal(pirate);
     pirate.piracyUsed = true;
+    this.session.log.push({
+      time: Date.now(),
+      action: `${this.myPlayer.name} stole 1 food from ${player.name}`
+    });
     this.handleCommunications(pirate, this.myPlayer,[CardTypes.COMMUNICATION]);
     this.sessionFacade.updateSessionFood(this.myPlayer, this.session);
   }
@@ -340,6 +406,11 @@ export class GameComponent implements OnChanges {
           animal: animal.index
         }
       };
+
+      this.session.log.push({
+        time: Date.now(),
+        action: `${this.myPlayer.name} attack on ${player.name}`
+      });
       this.sessionFacade.createAttack(this.session);
     } else {
       this.eatAnimal(carnivorous, animal, player, this.myPlayer);
@@ -354,6 +425,10 @@ export class GameComponent implements OnChanges {
       const carnivorous = attacker.animals[this.session.attack.carnivorous.animal];
       if (this.#animalCanDefend(animal, this.myPlayer, carnivorous)) {
         this.session.attack.pray.animal = animal.index;
+        this.session.log.push({
+          time: Date.now(),
+          action: `${this.myPlayer.name} use mimicry to change attack`
+        });
       } else {
         this.eatAnimal(carnivorous, animal, this.myPlayer, attacker);
         this.sessionFacade.respondAttack(this.myPlayer, this.session);
@@ -384,13 +459,27 @@ export class GameComponent implements OnChanges {
   }
 
   tryToRun(animal: Animal): void {
+
+    this.session.log.push({
+      time: Date.now(),
+      action: `${this.myPlayer.name} is trying to RUN`
+    });
     const attack: Attack = this.session.attack as Attack;
     const attacker: Player = this.session.players[attack.carnivorous.player];
     const carnivorous = attacker.animals[attack.carnivorous.animal];
     carnivorous.attacked = true;
 
     if (this.sessionFacade.getDiceNumber() < 4) {
+      this.session.log.push({
+        time: Date.now(),
+        action: `${this.myPlayer.name} RUN failed`
+      });
       this.eatAnimal(carnivorous, animal, this.myPlayer, attacker);
+    } else {
+      this.session.log.push({
+        time: Date.now(),
+        action: `${this.myPlayer.name} RUN success!`
+      });
     }
 
     this.sessionFacade.respondAttack(this.myPlayer, this.session);
@@ -405,6 +494,11 @@ export class GameComponent implements OnChanges {
     if (!this.session.attack) {
       return;
     }
+
+    this.session.log.push({
+      time: Date.now(),
+      action: `${this.myPlayer.name} uses tail loss to drop ${UI_PROPERTY_MAP[prop].title}`
+    });
     const attacker = this.session.players[this.session.attack.carnivorous.player];
     const carnivorous = attacker.animals[this.session.attack.carnivorous.animal];
     carnivorous.attacked = true;
@@ -518,6 +612,10 @@ export class GameComponent implements OnChanges {
     if (this.canEat(carnivorous)) {
       this.handleFeedAnimal(carnivorous);
     }
+    this.session.log.push({
+      time: Date.now(),
+      action: `${attaker.name} ate ${player.name}'s animal`
+    });
     if (animal.properties.includes(CardTypes.POISONOUS)) {
       carnivorous.poisoned = true;
     }
@@ -548,6 +646,10 @@ export class GameComponent implements OnChanges {
       const scavenger = this.session.players[player.id].animals.find(a => a.properties.includes(CardTypes.SCAVENGER) && this.canEat(a));
       if (scavenger) {
         this.handleFeedAnimal(scavenger);
+        this.session.log.push({
+          time: Date.now(),
+          action: `${player.name}'s scavenger received 1 food`
+        });
         this.handleCommunications(scavenger, player, [CardTypes.COMMUNICATION]);
         return;
       }
@@ -566,6 +668,10 @@ export class GameComponent implements OnChanges {
         if (!this.applyCommunication(animal, prop.property)) {
           break;
         }
+        this.session.log.push({
+          time: Date.now(),
+          action: `${player.name}'s animal received 1 food by ${UI_PROPERTY_MAP[prop.property].title}`
+        });
         prop = props.find(p => p[d.from as keyof DoubleProperty] === animal.index);
       }
     });

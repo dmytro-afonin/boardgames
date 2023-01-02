@@ -119,6 +119,12 @@ export interface EvolutionSessionEntity {
   finished: boolean;
   attack: Attack | null;
   players: Record<string, Player>;
+  log: Turn[];
+}
+
+export interface Turn {
+  time: number;
+  action: string;
 }
 
 export interface CardSchemeItem {
