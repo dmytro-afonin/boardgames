@@ -333,15 +333,15 @@ export class GameComponent implements OnChanges {
       this.cancelSelectedProperty();
       return;
     }
-
+    this.resetAnimalsActions();
     this.myPlayer.animals.forEach(a => {
-      if (a.food && this.canEat(a)) {
+      if (a.food && a.food < a.requiredFood && a.index !== animal.index) {
         a.canBeActioned = true;
       }
     });
-    this.players.forEach(p => {
+    this.players.filter(p => p.id !== this.myPlayer.id).forEach(p => {
       p.animals.forEach(a => {
-        if (a.food && this.canEat(a)) {
+        if (a.food && a.food < a.requiredFood) {
           a.canBeActioned = true;
         }
       })
@@ -523,8 +523,15 @@ export class GameComponent implements OnChanges {
         if (animal.food > animal.requiredFood) {
           animal.food = animal.requiredFood;
         }
-      }
         break;
+      }
+      case CardTypes.CARNIVOROUS: {
+        animal.requiredFood--;
+        if (animal.food > animal.requiredFood) {
+          animal.food = animal.requiredFood;
+        }
+        break;
+      }
     }
 
     const attacker = this.session.players[this.session.attack.carnivorous.player];
