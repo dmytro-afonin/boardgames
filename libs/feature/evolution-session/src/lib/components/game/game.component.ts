@@ -675,7 +675,7 @@ export class GameComponent implements OnChanges {
     directions.forEach(d => {
       let prop = props.find(p => p[d.from as keyof DoubleProperty] === animal.index && types.includes(p.property));
       while (prop) {
-        const animal = this.myPlayer.animals[prop[d.to as keyof DoubleProperty]];
+        const animal = player.animals[prop[d.to as keyof DoubleProperty]];
         if (!this.applyCommunication(animal, prop.property)) {
           break;
         }
