@@ -74,7 +74,7 @@
                 (click)="endPhase($event)"
               >
                 <mat-icon>next_plan</mat-icon>
-                <span class='pl-3'>End phase</span>
+                <span class='pl-3'>Finish {{session.phase === 0 ? 'GROWING' : 'EATING'}}</span>
               </button>
             </div>
           </mat-panel-description>
