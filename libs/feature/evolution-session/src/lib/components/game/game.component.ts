@@ -8,7 +8,7 @@ import {
   EvolutionSessionFacade,
   HandCard,
   Phase,
-  Player,
+  Player, Turn,
   WEIGHT_PROPERTY_MAP
 } from '@boardgames/data/evolution-session';
 import { User } from '@boardgames/data/auth';
@@ -50,6 +50,7 @@ export class GameComponent implements OnChanges {
   selectedProperty!: CardTypes | null;
   selectedAnimalIndex!: number | null;
   foodSelected!: boolean;
+  log: Turn[] = [];
 
   constructor(
     private readonly sessionFacade: EvolutionSessionFacade
@@ -63,6 +64,9 @@ export class GameComponent implements OnChanges {
   }
   trackByProperty(_i: number, a: CardTypes): CardTypes {
     return a;
+  }
+  trackByLog(_i: number, a: Turn): CardTypes {
+    return a.time;
   }
   /** ------------------ USER ACTIONS ------------------ */
 
@@ -542,7 +546,7 @@ export class GameComponent implements OnChanges {
     });
   }
 
-  /* ------------------ BEFORE EAT ------------------ */
+  /** ------------------ BEFORE EAT ------------------ */
 
   canEat(a: Animal): boolean {
     const symbiosys = this.myPlayer.properties.find(p => p.property === CardTypes.SYMBIOSYS && p.animal2 === a.index);
@@ -613,7 +617,7 @@ export class GameComponent implements OnChanges {
   }
 
 
-  /* ------------------ EAT ------------------ */
+  /** ------------------ EAT ------------------ */
   eatAnimal(carnivorous: Animal, animal: Animal, player: Player, attaker: Player): void {
     this.handleFeedAnimal(carnivorous);
     if (this.canEat(carnivorous)) {
@@ -642,7 +646,7 @@ export class GameComponent implements OnChanges {
     this.handleCommunications(carnivorous, this.myPlayer,[CardTypes.COOPERATION]);
   }
 
-  /* ------------------ AFTER EAT ------------------ */
+  /** ------------------ AFTER EAT ------------------ */
 
   #feedScavenger(attacker: Player): void {
     const players = [...this.players];
@@ -741,6 +745,7 @@ export class GameComponent implements OnChanges {
         audio.play();
       }
     }
+    this.log = [...this.session.log].reverse();
     const players = this.session.players;
     this.myPlayer = players[this.user.id];
     this.players = Object.values(players).sort((a,b) => a.order > b.order ? 1 : -1);

@@ -210,7 +210,7 @@
 
   <div class='w-96 game log pl-3 overflow-auto' *ngIf='showLog'>
     <div
-      *ngFor='let action of session.log'
+      *ngFor='let action of session.log; trackBy: trackByLog'
       [@properties]='"in"'
     >
       [{{action.time | date : 'HH:mm:ss'}}]: {{action.action}}

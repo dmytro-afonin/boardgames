@@ -30,7 +30,6 @@ export enum CardTypes {
   HIBERNATION_ABILITY
 }
 
-
 export const WEIGHT_PROPERTY_MAP: Record<CardTypes, number> = {
   [CardTypes.ANIMAL]: 0,
   [CardTypes.MIMICRY]: 0,
@@ -53,7 +52,6 @@ export const WEIGHT_PROPERTY_MAP: Record<CardTypes, number> = {
   [CardTypes.GRAZING]: 0,
   [CardTypes.HIBERNATION_ABILITY]: 0
 }
-
 
 export interface HandCard {
   type1: CardTypes,
@@ -95,6 +93,7 @@ export interface Player {
   endPhase: boolean;
   score: number;
 }
+
 export interface Attack {
   carnivorous: {
     player: string;
